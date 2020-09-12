@@ -1,11 +1,17 @@
-Silent Cities AudioTagging
+Silent Cities Data preprocessing
 --
 
-Applying a pretrained DL model to annotate soundscapes. 
-This was developed for analyzing the data collected in the [Silent Cities project](https://osf.io/h285u/).
+This repository includes python code for preprocessing data from the [Silent Cities project](https://osf.io/h285u/). 
 
-Used model: 
-- Audio Tagging on [Audioset](https://research.google.com/audioset/) using ResNet22 from [PANNs](https://github.com/qiuqiangkong/audioset_tagging_cnn)
+Data preparation:
+- Generation of a metadata file for each recording site, gathering all available audio for this site
+- Generation of a metadata file across all sites
+
+Data analysis:
+- Calculation of ecoacoustic indices every 10 seconds
+- Applying a pretrained Deep Learning model for audio tagging. (pretrained on [Audioset](https://research.google.com/audioset/) using ResNet22 from [PANNs](https://github.com/qiuqiangkong/audioset_tagging_cnn))
+
+This was developed for analyzing the data collected in the [Silent Cities project](https://osf.io/h285u/).
 
 Requirements
 --
