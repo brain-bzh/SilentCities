@@ -115,5 +115,5 @@ def process_site(database, file_):
 for file_ in filelist:
     DATABASE = process_site(DATABASE.copy(deep = True), file_)
 
-DATABASE.to_pickle('database_pross.pkl')
-DATABASE.to_csv('database_pross.csv')
+DATABASE.to_pickle(os.path.join(args.save_path,'database_pross.pkl'))
+DATABASE.to_csv(os.path.join(args.save_path,'database_pross.csv'))
