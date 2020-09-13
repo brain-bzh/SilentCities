@@ -13,7 +13,7 @@ from .pytorch_utils import move_data_to_device
 from .config import sample_rate,classes_num,labels
 from scipy.signal import resample 
 
-def audio_tagging(audio_path,waveform, sr_in, checkpoint_path,offset=None,duration=None,window_size=1024,hop_size=320,mel_bins=64,fmin=50,fmax=14000,model_type="ResNet22",usecuda=False):
+def audio_tagging(waveform, checkpoint_path,offset=None,duration=None,window_size=1024,hop_size=320,mel_bins=64,fmin=50,fmax=14000,model_type="ResNet22",usecuda=False):
     """Inference audio tagging result of an audio clip.
     """
 
@@ -38,21 +38,15 @@ def audio_tagging(audio_path,waveform, sr_in, checkpoint_path,offset=None,durati
 
     if 'cuda' in str(device):
         model.to(device)
-    
-    # Load audio
-    # (waveform, sr_in) = librosa.core.load(audio_path, sr=None, mono=True,offset=offset,duration=duration)
-    N = len(waveform)
-    t = int(N/sr_in)
-    N_resample = int(t*sample_rate)
-    waveform = resample(waveform, N_resample)
-    waveform = waveform[None, :]    # (1, audio_length)
-    waveform = move_data_to_device(waveform, device)
+        waveform.to(device)
 
+    
     # Forward
+    # print(waveform.size())
     model.eval()
     batch_output_dict = model(waveform, None)
 
-    clipwise_output = batch_output_dict['clipwise_output'].data.cpu().numpy()[0]
+    clipwise_output = batch_output_dict['clipwise_output'].data.cpu().numpy()
     """(classes_num,)"""
 
     sorted_indexes = np.argsort(clipwise_output)[::-1]
@@ -63,7 +57,7 @@ def audio_tagging(audio_path,waveform, sr_in, checkpoint_path,offset=None,durati
     #        clipwise_output[sorted_indexes[k]]))
 
     if 'embedding' in batch_output_dict.keys():
-        embedding = batch_output_dict['embedding'].data.cpu().numpy()[0]
+        embedding = batch_output_dict['embedding'].data.cpu().numpy()
         #print('embedding: {}'.format(embedding.shape))
 
-    return clipwise_output, labels,sorted_indexes,embedding
+    return clipwise_output, labels, sorted_indexes, embedding

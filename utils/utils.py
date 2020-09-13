@@ -7,7 +7,7 @@ import matplotlib.patches as patches
 from matplotlib import pyplot as plt
 
 import datetime
-
+import pickle
 import os
 
 def convert_Audio(mediaFile, outFile):
@@ -75,3 +75,12 @@ def read_audio_hdr(strWAVFile,verbose=False):
         metadata = dict(time=curtime,date=curdate,datetime=curdate_time,id=SM4id,gain=0)
 
     return AMOhdr,metadata
+
+
+def save_obj(obj, name ):
+    with open(name, 'wb') as f:
+        pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+
+def load_obj(name ):
+    with open(name , 'rb') as f:
+        return pickle.load(f)
