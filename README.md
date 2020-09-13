@@ -17,6 +17,8 @@ Requirements
 --
 - [pytorch](https://pytorch.org/) 1.4.0
 - [librosa](https://librosa.github.io/librosa/)
+- argparse
+- scipy
 - tqdm
 - pandas
 - numpy
@@ -25,6 +27,63 @@ Requirements
 
 Usage
 --
+## Preprocessing : 
+
+file by file 
+
+    python metadata_file.py [-h] [--folder FOLDER] 
+                                [--save_path SAVE_PATH]
+                                [--verbose] [--all]
+
+    Silent City Meta data genetor file by file
+
+    optional arguments:
+    -h, --help            show this help message and exit
+    --folder FOLDER       Path to folder with wavefiles, will walk through subfolders
+    --save_path SAVE_PATH
+                            Path to save meta data
+    --verbose             Verbose (default False = nothing printed)
+    --all                 process all site. for multiple HDD (list path must be given in HDD variable in the script)
+Generate one CSV by site
+
+All site
+
+    python metadata_site.py [-h] [--folder FOLDER] 
+                            [--save_path SAVE_PATH] [--database DATABASE] 
+                            [--verbose]
+
+    Silent City Meta data genetor site by site
+
+    optional arguments:
+    -h, --help            show this help message and exit
+    --folder FOLDER       Path to folder with meta data
+    --save_path SAVE_PATH Path to save meta data by site
+    --database DATABASE   database (csv)
+    --verbose             Verbose (default False = nothing printed)
+Generate metadata from all site (one CSV)
+
+## Audio processing
+Processing one site
+
+    python audio_processing.py [-h] [--length LENGTH] [--batch_size BATCH_SIZE] 
+                                [--metadata_folder METADATA_FOLDER] [--site SITE] 
+                                [--folder FOLDER] [--database DATABASE] [--nocuda]
+
+    Silent City Audio Tagging with pretrained LeeNet22 on Audioset
+
+    optional arguments:
+    -h, --help            show this help message and exit
+    --length LENGTH       Segment length
+    --batch_size BATCH_SIZE
+                            batch size
+    --metadata_folder METADATA_FOLDER
+                            folder with all metadata
+    --site SITE           site to process
+    --folder FOLDER       Path to folder with wavefiles, will walk through subfolders
+    --database DATABASE   Path to metadata (given by metadata_site.py)
+    --nocuda              Do not use the GPU for acceleration
+
+<!-- 
     python tag_silentcities.py [-h] [--length LENGTH] 
                        [--folder FOLDER] [--file FILE] [--verbose]
                        [--overwrite] [--out OUT]
@@ -51,7 +110,7 @@ Use the [make_interactive_pdf](postprocess.py) function to generate an estimate 
 
 ![Audio tagging of one night long recording in a street of Toulouse, France (March 16th / 17th 2020). Audio tagging was performed using a deep neural network pretrained on the Audioset dataset.
 ](silentcity2.png)
-
+ -->
 
 Credits
 --

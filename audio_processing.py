@@ -18,7 +18,7 @@ parser.add_argument('--site', default=None, type=str, help='site to process')
 parser.add_argument('--folder', default=None, type=str,
                     help='Path to folder with wavefiles, will walk through subfolders')
 parser.add_argument('--database', default=None, type=str,
-                    help='Path to folder with wavefiles, will walk through subfolders')
+                    help='Path to metadata (given by metadata_site.py)')
 
 parser.add_argument('--nocuda', action='store_false',
                     help='Do not use the GPU for acceleration')
