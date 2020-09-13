@@ -17,7 +17,8 @@ import torch
 from torch.utils.data import Dataset
 
 from utils.parameters import len_audio_s
-from utils.ecoacoustics import compute_NDSI, compute_NB_peaks, compute_ACI
+from utils.ecoacoustics import compute_NDSI, compute_NB_peaks, compute_ACI, compute_spectrogram
+from utils.alpha_indices import acoustic_events, acoustic_activity, spectral_entropy, bioacousticsIndex
 # from audio_processing import DATABASE
 
 
@@ -35,6 +36,28 @@ if not os.path.exists(DATA_PATH):
     print(f"{DATA_PATH} folder created.")
 
 
+def compute_ecoacoustics(wavforme, sr):
+    Sxx, freqs = compute_spectrogram(wavforme, sr)
+    Sxx_dB = 10*np.log10(Sxx)
+    N = len(wavforme)
+    
+    nbpeaks = compute_NB_peaks(Sxx, freqs, sr)
+    aci, _ = compute_ACI(Sxx, freqs, N, sr)
+    ndsi = compute_NDSI(wavforme,sr)
+    bi = bioacousticsIndex(Sxx, freqs)
+    _, _, EVN,_  = acoustic_events(Sxx_dB, 1/sr)
+    # print(EVN)
+    _, _, ACT = acoustic_activity(Sxx_dB, dB_threshold = 30)
+    EAS,_,ECV,EPS,_,_ = spectral_entropy(Sxx, freqs)
+
+    indicateur = {'ndsi': ndsi, 'aci': aci, 'nbpeaks': nbpeaks, 'BI' : bi, 'EVN' : sum(EVN), 'ACT' : sum(ACT), 'EAS' : EAS, 'ECV' : ECV, 'EPS' : EPS}
+    # print(indicateur)
+    return indicateur
+
+
+
+
+
 class Silent_dataset(Dataset):
     def __init__(self, meta_dataloader, sr):
         self.sr = sr
@@ -49,15 +72,13 @@ class Silent_dataset(Dataset):
         if int(self.meta['sr'][idx]) != self.sr:
             wav = resample(wav, int(len_audio_s*self.sr))
 
-        ndsi = compute_NDSI(wav, self.sr)
-        nbpeaks = compute_NB_peaks(wav, self.sr)
-        aci, _ = compute_ACI(wav, self.sr)
-
+        ecoac = compute_ecoacoustics(wav, self.sr)
+        
         wav = torch.tensor(wav)
 
         return (wav.view(int(len_audio_s*self.sr)), {'name': os.path.basename(filename), 
                                                         'date': self.meta['date'][idx].strftime('%Y%m%d_%H%M%S'), 
-                                                        'ecoac': {'ndsi': ndsi, 'aci': aci, 'nbpeaks': nbpeaks}})
+                                                        'ecoac': ecoac })
 
     def __len__(self):
         return len(self.meta['filename'])

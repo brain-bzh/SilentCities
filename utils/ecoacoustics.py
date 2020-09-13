@@ -98,9 +98,9 @@ def compute_spectrogram(sig,sr, windowLength=512, windowHop= 256, square=True, w
         spectro = spectro/np.max(spectro) # set the maximum value to 1 y
 
     frequencies = [e * (sr/2) / float(windowLength / 2) for e in range(halfWindowLength)] # vector of frequency<-bin in the spectrogram
-    return spectro, frequencies
+    return spectro, np.array(frequencies)
 
-def compute_NB_peaks(wave,sr, freqband = 200, normalization= True, slopes=(0.01,0.01)):
+def compute_NB_peaks(spectro, frequencies, sr, freqband = 200, normalization= True, slopes=(0.01,0.01)):
     """
     Counts the number of major frequency peaks obtained on a mean spectrum.
     spectro: spectrogram of the audio signal
@@ -111,7 +111,7 @@ def compute_NB_peaks(wave,sr, freqband = 200, normalization= True, slopes=(0.01,
     Ref: Gasc, A., Sueur, J., Pavoine, S., Pellens, R., & Grandcolas, P. (2013). Biodiversity sampling using a global acoustic approach: contrasting sites with microendemics in New Caledonia. PloS one, 8(5), e65311.
     """
 
-    spectro, frequencies = compute_spectrogram(wave,sr)
+    
     meanspec = np.array([np.mean(row) for row in spectro])
 
     if normalization:
@@ -140,7 +140,7 @@ def compute_NB_peaks(wave,sr, freqband = 200, normalization= True, slopes=(0.01,
     return len(peaks_indices)
 
 
-def compute_ACI(wave,sr):
+def compute_ACI(spectro, wave, j_bin, sr):
     """
     Compute the Acoustic Complexity Index from the spectrogram of an audio signal.
     Reference: Pieretti N, Farina A, Morri FD (2011) A new methodology to infer the singing activity of an avian community: the Acoustic Complexity Index (ACI). Ecological Indicators, 11, 868-873.
@@ -148,8 +148,7 @@ def compute_ACI(wave,sr):
     spectro: the spectrogram of the audio signal
     j_bin: temporal size of the frame (in samples)
     """
-    j_bin= wave.shape[0] 
-    spectro, _ = compute_spectrogram(wave,sr)
+    
     #times = range(0, spectro.shape[1], j_bin) # relevant time indices
     times = range(0, spectro.shape[1]-10, j_bin) # alternative time indices to follow the R code
 

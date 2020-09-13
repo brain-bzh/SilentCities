@@ -55,7 +55,8 @@ if os.path.exists(audio_process_name):
     df_site = utils.utils.load_obj(audio_process_name)
 
 else:
-    df_site = {'datetime': [], 'ndsi': [], 'aci': [], 'nbpeaks': [] , 'clipwise_output':[], 'sorted_indexes' : [] ,'embedding' : []}
+    df_site = {'datetime': [], 'ndsi': [], 'aci': [], 'nbpeaks': [] , 'BI' : [], 'EVN' : [], 'ACT' : [], 'EAS':[], 'ECV' : [], 'EPS' : [],
+                                'clipwise_output':[], 'sorted_indexes' : [] ,'embedding' : []}
 
 print('audio processing')
 
