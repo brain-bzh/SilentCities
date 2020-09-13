@@ -55,7 +55,7 @@ if os.path.exists(audio_process_name):
     df_site = utils.utils.load_obj(audio_process_name)
 
 else:
-    df_site = {'datetime': [], 'ndsi': [], 'aci': [], 'nbpeaks': [] , 'BI' : [], 'EVN' : [], 'ACT' : [], 'EAS':[], 'ECV' : [], 'EPS' : [],
+    df_site = {'name':[],'start':[], 'datetime': [], 'ndsi': [], 'aci': [], 'nbpeaks': [] , 'BI' : [], 'EVN' : [], 'ACT' : [], 'EAS':[], 'ECV' : [], 'EPS' : [],
                                 'clipwise_output':[], 'sorted_indexes' : [] ,'embedding' : []}
 
 print('audio processing')
@@ -66,6 +66,8 @@ for batch_idx, (inputs, info) in tqdm(enumerate(site_set)):
         print('already exist')
     else : 
         df_site['datetime'] += info['date'] 
+        df_site['name'] += info['name']
+        df_site['start'] += info['start'] 
         for key in info['ecoac'].keys():
             df_site[key] += list(info['ecoac'][key].numpy())
 

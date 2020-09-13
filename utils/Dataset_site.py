@@ -70,13 +70,25 @@ class Silent_dataset(Dataset):
                               offset=self.meta['start'][idx], duration=len_audio_s)
 
         if int(self.meta['sr'][idx]) != self.sr:
-            wav = resample(wav, int(len_audio_s*self.sr))
+            try : 
+                wav = resample(wav, int(len_audio_s*self.sr))
+            except:
+                ecoac = {'ndsi': None, 'aci': None, 'nbpeaks': None, 'BI' : None, 'EVN' : None, 'ACT' : None, 'EAS' : None, 'ECV' : None, 'EPS' : None}
+                wav = torch.ones(int(len_audio_s*self.sr))
+                print('error'  + filename)
+                return (wav.view(int(len_audio_s*self.sr)), {'name': os.path.basename(filename), 
+                                                                'date': self.meta['date'][idx].strftime('%Y%m%d_%H%M%S'), 
+                                                                'ecoac': ecoac })
 
-        ecoac = compute_ecoacoustics(wav, self.sr)
-        
+
+        try : 
+            ecoac = compute_ecoacoustics(wav, self.sr)
+        except :
+            print('error    :'+ filename)
+            ecoac = {'ndsi': None, 'aci': None, 'nbpeaks': None, 'BI' : None, 'EVN' : None, 'ACT' : None, 'EAS' : None, 'ECV' : None, 'EPS' : None}
         wav = torch.tensor(wav)
 
-        return (wav.view(int(len_audio_s*self.sr)), {'name': os.path.basename(filename), 
+        return (wav.view(int(len_audio_s*self.sr)), {'name': os.path.basename(filename), 'start': self.meta['start'][idx],
                                                         'date': self.meta['date'][idx].strftime('%Y%m%d_%H%M%S'), 
                                                         'ecoac': ecoac })
 
@@ -88,6 +100,12 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, meta_path ,sample_rate
     
     if os.path.exists(os.path.join(meta_path, site_ID+'_metaloader.pkl')):
         meta_dataloader = pd.read_pickle(os.path.join(meta_path, site_ID+'_metaloader.pkl'))
+        audio_process_name = os.path.join(meta_path, '{}_process.pkl'.format(site_ID))
+        df_site = pd.DataFrame(pd.read_pickle(audio_process_name))
+
+        for idx, file_ in enumerate(df_site['name']):
+            # if (file_ == meta_dataloader['filename'][idx]) and (df_site['start'][idx] == meta_dataloader['start'][idx]):
+            meta_dataloader = meta_dataloader.drop(meta_dataloader.index[idx])
     else:
         meta_dataloader = pd.DataFrame(
             columns=['filename', 'sr', 'start', 'stop'])
@@ -114,7 +132,7 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, meta_path ,sample_rate
         meta_dataloader.to_pickle(os.path.join(meta_path, site_ID+'_metaloader.pkl'))
     print(meta_dataloader)
 
-    site_set = Silent_dataset(meta_dataloader, sample_rate)
+    site_set = Silent_dataset(meta_dataloader.reset_index(drop=True), sample_rate)
     site_set = torch.utils.data.DataLoader(
         site_set, batch_size=batch_size, shuffle=False, num_workers=NUM_CORE-1)
 
