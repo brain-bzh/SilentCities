@@ -77,7 +77,7 @@ for batch_idx, (inputs, info) in tqdm(enumerate(site_set)):
             df_site['sorted_indexes'].append(sorted_indexes[idx])
             df_site['embedding'].append(embedding[idx])
         
-    if batch_idx%4 == 0:
+    if batch_idx%100 == 0:
         utils.utils.save_obj(df_site, audio_process_name)
     
-print(df_site)
+# print(df_site)20424

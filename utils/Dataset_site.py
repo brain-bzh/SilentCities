@@ -66,7 +66,7 @@ class Silent_dataset(Dataset):
 
 def get_dataloader_site(site_ID, path_wavfile, meta_site, meta_path ,sample_rate=32000, batch_size=6):
     
-    if os.path.exists(os.path.join(meta_path, site_ID+'metaloader.pkl')):
+    if os.path.exists(os.path.join(meta_path, site_ID+'_metaloader.pkl')):
         meta_dataloader = pd.read_pickle(os.path.join(meta_path, site_ID+'_metaloader.pkl'))
     else:
         meta_dataloader = pd.DataFrame(
@@ -87,7 +87,7 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, meta_path ,sample_rate
 
             nb_win = int(duration//len_audio_s)
 
-            for win in range(nb_win-1):
+            for win in range(nb_win):
                 delta = datetime.timedelta(seconds=int((win*len_audio_s)))
                 meta_dataloader = meta_dataloader.append({'filename': filelist[filelist_base.index(wavfile)], 'sr': sr_in, 'start': (
                     win*len_audio_s), 'stop': ((win+1)*len_audio_s), 'len': len_file, 'date': meta_site['datetime'][idx] + delta}, ignore_index=True)
