@@ -139,7 +139,7 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, meta_path ,sample_rate
 
     site_set = Silent_dataset(meta_dataloader.reset_index(drop=True), sample_rate)
     site_set = torch.utils.data.DataLoader(
-        site_set, batch_size=batch_size, shuffle=False, num_workers=-1)
+        site_set, batch_size=batch_size, shuffle=False, num_workers=NUM_CORE-1)
 
     return site_set
 
