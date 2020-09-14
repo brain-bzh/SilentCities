@@ -35,7 +35,7 @@ file by file
                                 [--save_path SAVE_PATH]
                                 [--verbose] [--all]
 
-    Silent City Meta data genetor file by file
+    Silent City Meta data generator file by file
 
     optional arguments:
     -h, --help            show this help message and exit
@@ -52,7 +52,7 @@ All site
                             [--save_path SAVE_PATH] [--database DATABASE] 
                             [--verbose]
 
-    Silent City Meta data genetor site by site
+    Silent City Meta data generator site by site
 
     optional arguments:
     -h, --help            show this help message and exit
@@ -63,13 +63,15 @@ All site
 Generate metadata from all site (one CSV)
 
 ## Audio processing
+**First download the ResNet22 pretrained model using instructions [here](https://github.com/qiuqiangkong/audioset_tagging_cnn#audio-tagging-using-pretrained-models)**
+
 Processing one site
 
     python audio_processing.py [-h] [--length LENGTH] [--batch_size BATCH_SIZE] 
                                 [--metadata_folder METADATA_FOLDER] [--site SITE] 
                                 [--folder FOLDER] [--database DATABASE] [--nocuda]
 
-    Silent City Audio Tagging with pretrained LeeNet22 on Audioset
+    Silent City Audio Tagging with pretrained ResNet22 on Audioset (from https://github.com/qiuqiangkong/audioset_tagging_cnn)
 
     optional arguments:
     -h, --help            show this help message and exit
@@ -82,6 +84,8 @@ Processing one site
     --folder FOLDER       Path to folder with wavefiles, will walk through subfolders
     --database DATABASE   Path to metadata (given by metadata_site.py)
     --nocuda              Do not use the GPU for acceleration
+
+
 
 <!-- 
     python tag_silentcities.py [-h] [--length LENGTH] 
@@ -117,3 +121,5 @@ Credits
 Nicolas Farrugia, Nicolas Pajusco, IMT Atlantique, 2020. 
 
 Code for Audioset Tagging CNN from [Qiu Qiang Kong](https://github.com/qiuqiangkong/audioset_tagging_cnn)
+
+Code for Eco-acoustic indices from [Patric Guyot](https://github.com/patriceguyot/Acoustic_Indices)
