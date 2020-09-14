@@ -98,13 +98,14 @@ class Silent_dataset(Dataset):
         return len(self.meta['filename'])
 
 
-def get_dataloader_site(site_ID, path_wavfile, meta_site, meta_path ,sample_rate=32000, batch_size=6):
+def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path ,sample_rate=32000, batch_size=6):
     
     if os.path.exists(os.path.join(meta_path, site_ID+'_metaloader.pkl')):
         meta_dataloader = pd.read_pickle(os.path.join(meta_path, site_ID+'_metaloader.pkl'))
-        audio_process_name = os.path.join(meta_path, '{}_process.pkl'.format(site_ID))
-        # df_site = pd.DataFrame(pd.read_pickle(audio_process_name))
-
+        # df_site = pd.read_pickle(df_site)
+        N = len(df_site['datetime'])
+        print(N)
+        meta_dataloader = meta_dataloader[N:]
         # for idx, file_ in tqdm(enumerate(df_site['name'])):
         #     # if (file_ == meta_dataloader['filename'][idx]) and (df_site['start'][idx] == meta_dataloader['start'][idx]):
         #     meta_dataloader = meta_dataloader.drop(meta_dataloader.index[idx])

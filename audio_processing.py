@@ -46,8 +46,7 @@ meta_site = pd.read_pickle(os.path.join(
     args.metadata_folder, args.site+'.pkl')).reset_index(drop=True)
 
 print('preprocessing dataset')
-site_set = dataset.get_dataloader_site(
-    args.site, args.folder, meta_site, args.metadata_folder, batch_size=args.batch_size)
+
 
 audio_process_name = os.path.join(args.metadata_folder, '{}_process.pkl'.format(args.site))
 
@@ -57,30 +56,29 @@ if os.path.exists(audio_process_name):
 else:
     df_site = {'name':[],'start':[], 'datetime': [], 'ndsi': [], 'aci': [], 'nbpeaks': [] , 'BI' : [], 'EVN' : [], 'ACT' : [], 'EAS':[], 'ECV' : [], 'EPS' : [],
                                 'clipwise_output':[], 'sorted_indexes' : [] ,'embedding' : []}
-
+site_set = dataset.get_dataloader_site(
+    args.site, args.folder, meta_site, df_site,args.metadata_folder, batch_size=args.batch_size)
 print('audio processing')
 
 for batch_idx, (inputs, info) in tqdm(enumerate(site_set)):
+    
+    df_site['datetime'] += info['date'] 
+    df_site['name'] += info['name']
+    df_site['start'] += info['start'] 
+    for key in info['ecoac'].keys():
+        df_site[key] += list(info['ecoac'][key].numpy())
 
-    if (str(info['date'][0]) in df_site['datetime']):
-        print('already exist')
-    else : 
-        df_site['datetime'] += info['date'] 
-        df_site['name'] += info['name']
-        df_site['start'] += info['start'] 
-        for key in info['ecoac'].keys():
-            df_site[key] += list(info['ecoac'][key].numpy())
+    with torch.no_grad():
 
-        with torch.no_grad():
-
-            clipwise_output, labels, sorted_indexes, embedding = audio_tagging(inputs, checkpoint_path , usecuda=args.nocuda)
-        
-        for idx in range(len(info['date'])):
-            df_site['clipwise_output'].append(clipwise_output[idx])
-            df_site['sorted_indexes'].append(sorted_indexes[idx])
-            df_site['embedding'].append(embedding[idx])
-        
+        clipwise_output, labels, sorted_indexes, embedding = audio_tagging(inputs, checkpoint_path , usecuda=args.nocuda)
+    
+    for idx in range(len(info['date'])):
+        df_site['clipwise_output'].append(clipwise_output[idx])
+        df_site['sorted_indexes'].append(sorted_indexes[idx])
+        df_site['embedding'].append(embedding[idx])
+    
     if batch_idx%100 == 0:
         utils.utils.save_obj(df_site, audio_process_name)
+utils.utils.save_obj(df_site, audio_process_name)
     
 # print(df_site)20424
