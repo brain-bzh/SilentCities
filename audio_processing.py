@@ -43,7 +43,7 @@ if args.database is None:
 DATABASE = pd.read_pickle(args.database)
 
 meta_site = pd.read_pickle(os.path.join(
-    args.metadata_folder, args.site+'.pkl'))
+    args.metadata_folder, args.site+'.pkl')).reset_index(drop=True)
 
 print('preprocessing dataset')
 site_set = dataset.get_dataloader_site(

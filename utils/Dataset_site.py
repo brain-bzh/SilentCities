@@ -76,6 +76,8 @@ class Silent_dataset(Dataset):
                 ecoac = {'ndsi': None, 'aci': None, 'nbpeaks': None, 'BI' : None, 'EVN' : None, 'ACT' : None, 'EAS' : None, 'ECV' : None, 'EPS' : None}
                 wav = torch.ones(int(len_audio_s*self.sr))
                 print('error'  + filename)
+                print(self.meta['start'][idx])
+                
                 return (wav.view(int(len_audio_s*self.sr)), {'name': os.path.basename(filename), 
                                                                 'date': self.meta['date'][idx].strftime('%Y%m%d_%H%M%S'), 
                                                                 'ecoac': ecoac })
@@ -115,6 +117,7 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, meta_path ,sample_rate
             for name in files:
                 if name[-3:].casefold() == 'wav' and name[:2] != '._':
                     filelist.append(os.path.join(root, name))
+        
         filelist_base = [os.path.basename(file_) for file_ in filelist]
 
         for idx, wavfile in tqdm(enumerate(meta_site['filename'])):
