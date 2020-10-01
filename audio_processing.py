@@ -62,20 +62,23 @@ print('audio processing')
 
 for batch_idx, (inputs, info) in tqdm(enumerate(site_set)):
     
-    df_site['datetime'] += info['date'] 
-    df_site['name'] += info['name']
-    df_site['start'] += info['start'] 
-    for key in info['ecoac'].keys():
-        df_site[key] += list(info['ecoac'][key].numpy())
+    
+    
 
     with torch.no_grad():
 
         clipwise_output, labels, sorted_indexes, embedding = audio_tagging(inputs, checkpoint_path , usecuda=args.nocuda)
     
-    for idx in range(len(info['date'])):
+    for idx, date_ in enumerate(info['date']):
         df_site['clipwise_output'].append(clipwise_output[idx])
         df_site['sorted_indexes'].append(sorted_indexes[idx])
         df_site['embedding'].append(embedding[idx])
+        df_site['datetime'].append(str(date_)) 
+        df_site['name'].append(str(info['name'][idx]))
+        df_site['start'].append(float(info['start'][idx]))
+        for key in info['ecoac'].keys():
+            df_site[key].append(float(info['ecoac'][key].numpy()[idx])) 
+    # print(df_site['start'])
     
     if batch_idx%100 == 0:
         utils.utils.save_obj(df_site, audio_process_name)
