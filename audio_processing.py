@@ -55,6 +55,7 @@ if os.path.exists(audio_process_name):
 
 else:
     df_site = {'name':[],'start':[], 'datetime': [], 'ndsi': [], 'aci': [], 'nbpeaks': [] , 'BI' : [], 'EVN' : [], 'ACT' : [], 'EAS':[], 'ECV' : [], 'EPS' : [],
+    'ndsi_filt': [], 'aci_filt': [], 'nbpeaks_filt': [] , 'BI_filt' : [], 'EVN_filt' : [], 'ACT_filt' : [], 'EAS_filt':[], 'ECV_filt' : [], 'EPS_filt' : [],
                                 'clipwise_output':[], 'sorted_indexes' : [] ,'embedding' : []}
 site_set = dataset.get_dataloader_site(
     args.site, args.folder, meta_site, df_site,args.metadata_folder,database = DATABASE, batch_size=args.batch_size)

@@ -42,7 +42,8 @@ if not os.path.exists(DATA_PATH):
 def butter_bandpass(lowcut, highcut, fs, order=5):
     nyq = 0.5 * fs
     low = lowcut / nyq
-    high = highcut / nyq
+    high = max(highcut / nyq, 0.99)
+
     b, a = butter(order, [low, high], btype='band')
     return b, a
 
@@ -101,8 +102,8 @@ def compute_ecoacoustics(wavforme, sr, ref_mindb):
 
 class Silent_dataset(Dataset):
     def __init__(self, meta_dataloader, sr, file_refdB):
-        ref, _ = librosa.load(file_refdB, sr=None, mono=True)
-        ref_filt = butter_bandpass_filter(ref, 5000, 20000, fs = sr, order=9)
+        ref, sr_ = librosa.load(file_refdB, sr=None, mono=True)
+        ref_filt = butter_bandpass_filter(ref, 5000, 20000, fs = sr_, order=9)
         self.ref_dB = (20*np.log10(np.std(ref)), 20*np.log10(np.std(ref_filt)))                  
         self.sr = sr
         self.meta = meta_dataloader
@@ -110,12 +111,12 @@ class Silent_dataset(Dataset):
     def __getitem__(self, idx):
         filename = self.meta['filename'][idx]
 
-        wav, _ = librosa.load(filename, sr=None, mono=True,
+        wav, sr = librosa.load(filename, sr=None, mono=True,
                               offset=self.meta['start'][idx], duration=len_audio_s)
         
-        ecoac = compute_ecoacoustics(wav, self.sr, ref_mindb=self.ref_dB)
+        ecoac = compute_ecoacoustics(wav, sr, ref_mindb=self.ref_dB)
 
-        if int(self.meta['sr'][idx]) != self.sr:
+        if sr != self.sr:
             wav = resample(wav, int(len_audio_s*self.sr))
         
         # ecoac = compute_ecoacoustics(wav, self.sr, ref_mindb=self.ref_dB)
@@ -135,6 +136,13 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, dat
         meta_dataloader = pd.read_pickle(os.path.join(meta_path, site_ID+'_metaloader.pkl'))
         N = len(df_site['datetime'])
         meta_dataloader = meta_dataloader[N:]
+        for root, dirs, files in os.walk(path_wavfile, topdown=False):
+            for name in files:
+                if name[-3:].casefold() == 'wav' and name[:2] != '._':
+                    if name == file_refdB:
+                        print('coucou')
+                        file_refdB = os.path.join(root,name)
+        
     else:
         meta_dataloader = pd.DataFrame(
             columns=['filename', 'sr', 'start', 'stop'])
