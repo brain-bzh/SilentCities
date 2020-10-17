@@ -57,7 +57,7 @@ else:
     df_site = {'name':[],'start':[], 'datetime': [], 'ndsi': [], 'aci': [], 'nbpeaks': [] , 'BI' : [], 'EVN' : [], 'ACT' : [], 'EAS':[], 'ECV' : [], 'EPS' : [],
                                 'clipwise_output':[], 'sorted_indexes' : [] ,'embedding' : []}
 site_set = dataset.get_dataloader_site(
-    args.site, args.folder, meta_site, df_site,args.metadata_folder, batch_size=args.batch_size)
+    args.site, args.folder, meta_site, df_site,args.metadata_folder,database = DATABASE, batch_size=args.batch_size)
 print('audio processing')
 
 for batch_idx, (inputs, info) in tqdm(enumerate(site_set)):
