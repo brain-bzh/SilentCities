@@ -112,12 +112,13 @@ class Silent_dataset(Dataset):
 
         wav, _ = librosa.load(filename, sr=None, mono=True,
                               offset=self.meta['start'][idx], duration=len_audio_s)
-
-        if int(self.meta['sr'][idx]) != self.sr:
-            
-            wav = resample(wav, int(len_audio_s*self.sr))
         
         ecoac = compute_ecoacoustics(wav, self.sr, ref_mindb=self.ref_dB)
+
+        if int(self.meta['sr'][idx]) != self.sr:
+            wav = resample(wav, int(len_audio_s*self.sr))
+        
+        # ecoac = compute_ecoacoustics(wav, self.sr, ref_mindb=self.ref_dB)
         wav = torch.tensor(wav)
 
         return (wav.view(int(len_audio_s*self.sr)), {'name': os.path.basename(filename), 'start': self.meta['start'][idx],
@@ -128,7 +129,7 @@ class Silent_dataset(Dataset):
         return len(self.meta['filename'])
 
 
-def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path ,sample_rate=32000, database, batch_size=6):
+def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, database ,sample_rate=32000, batch_size=6):
     file_refdB = database['ref_file'][int(site_ID) - 1]
     if os.path.exists(os.path.join(meta_path, site_ID+'_metaloader.pkl')):
         meta_dataloader = pd.read_pickle(os.path.join(meta_path, site_ID+'_metaloader.pkl'))
