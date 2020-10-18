@@ -42,7 +42,7 @@ if not os.path.exists(DATA_PATH):
 def butter_bandpass(lowcut, highcut, fs, order=5):
     nyq = 0.5 * fs
     low = lowcut / nyq
-    high = max(highcut / nyq, 0.99)
+    high = min(highcut / nyq, 0.99)
 
     b, a = butter(order, [low, high], btype='band')
     return b, a
