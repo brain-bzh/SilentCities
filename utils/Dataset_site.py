@@ -164,7 +164,7 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, dat
 
             nb_win = int(duration // len_audio_s )
 
-            for win in range(nb_win-1):
+            for win in range(nb_win):
                 delta = datetime.timedelta(seconds=int((win*len_audio_s)))
                 meta_dataloader = meta_dataloader.append({'filename': filelist[filelist_base.index(wavfile)], 'sr': sr_in, 'start': (
                     win*len_audio_s), 'stop': ((win+1)*len_audio_s), 'len': len_file, 'date': meta_site['datetime'][idx] + delta}, ignore_index=True)
