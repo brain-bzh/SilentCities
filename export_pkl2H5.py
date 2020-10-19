@@ -23,7 +23,7 @@ for idx, k in enumerate(df['datetime']) :
 keys_ = list(df.keys())[:-3]
 df = pd.DataFrame(df)
 df_indic = df[keys_]
-df_indic.to_csv(f'{args.out}_indicateurs.csv')
+# df_indic.to_csv(f'{args.out}_indicateurs.csv')
 df_indic.to_hdf(f'{args.out}_indicateurs.h5', key='df_indic', mode='w', complevel=9)
 
 clipwise = np.zeros((len(df['clipwise_output']), 527))
@@ -34,7 +34,7 @@ DF = pd.DataFrame(clipwise, columns=labels)
 DF['datetime'] = df['datetime']
 DF['name'] = df['name']
 DF.to_hdf(f'{args.out}_proba.h5', key='DF', mode='w', complevel=9)
-DF.to_csv(f'{args.out}_proba.csv')
+# DF.to_csv(f'{args.out}_proba.csv')
 
 # fig = go.Figure(go.Scatter(x = df['datetime'], y = df['BI']))
 # fig.add_trace(go.Scatter(x = df['datetime'], y = df['BI_filt']))
