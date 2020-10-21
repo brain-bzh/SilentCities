@@ -64,7 +64,7 @@ def compute_ecoacoustics(wavforme, sr, ref_mindb):
     aci, _ = compute_ACI(Sxx, freqs, N, sr)
     ndsi = compute_NDSI(wavforme,sr)
     bi = bioacousticsIndex(Sxx, freqs)
-    _, _, EVN,_  = acoustic_events(Sxx_dB, 1/sr)
+    _, _, EVN,_  = acoustic_events(Sxx_dB, 1/(freqs[2]-freqs[1]))
     
     _, _, ACT = acoustic_activity(Sxx_dB, dB_threshold = ref_mindb[0]+20)
     EAS,_,ECV,EPS,_,_ = spectral_entropy(Sxx, freqs)
@@ -80,7 +80,7 @@ def compute_ecoacoustics(wavforme, sr, ref_mindb):
     aci_filt, _ = compute_ACI(Sxx, freqs, N, sr)
     ndsi_filt = compute_NDSI(wavforme,sr)
     bi_filt = bioacousticsIndex(Sxx, freqs)
-    _, _, EVN_filt,_  = acoustic_events(Sxx_dB, 1/sr)
+    _, _, EVN_filt,_  = acoustic_events(Sxx_dB, 1/(freqs[2]-freqs[1]) )
     
     _, _, ACT_filt = acoustic_activity(Sxx_dB, dB_threshold = ref_mindb[1]+20)
     EAS_filt,_,ECV_filt,EPS_filt,_,_ = spectral_entropy(Sxx, freqs)
