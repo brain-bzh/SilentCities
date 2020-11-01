@@ -1,7 +1,9 @@
-import plotly.express as px
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 import argparse
 import pandas as pd
 from datetime import datetime
+
 parser = argparse.ArgumentParser(
     description='Silent Cities export ecoacoustics indicateur as interactive graph')
 parser.add_argument('--path', type=str, help='path to pkl process')
@@ -22,8 +24,6 @@ for k in range(20):
     else :
         indic_tot.append(indic_filt[int((k-1)/2)])
 
-from plotly.subplots import make_subplots
-import plotly.graph_objects as go
 
 fig = make_subplots(rows=10, cols=2, subplot_titles=indic_tot,shared_xaxes='all')
 for idx, k in enumerate(indic): 
