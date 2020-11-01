@@ -5,7 +5,7 @@ import pandas as pd
 from datetime import datetime
 
 parser = argparse.ArgumentParser(
-    description='Silent Cities export ecoacoustics indicateur as interactive graph')
+    description='Silent Cities export ecoacoustics indicators as interactive graph')
 parser.add_argument('--path', type=str, help='path to pkl process')
 parser.add_argument('--savename',default=None, type=str, help='save html')
 args = parser.parse_args()
