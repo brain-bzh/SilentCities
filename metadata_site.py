@@ -56,7 +56,7 @@ filelist = []
 
 for root, dirs, files in os.walk(args.folder, topdown=False):
     for name in files:
-        if not('error' in name) and name[-3:].casefold() == 'pkl':
+        if not('error' in name) and not('meta' in name) and name[-3:].casefold() == 'pkl':
             filelist.append(os.path.join(root, name))
 print(filelist)            
 filelist.sort()
@@ -97,7 +97,7 @@ def process_site(database, file_):
             except:
                 error_date = True
             if ref_dB > df['dB'][idx]:
-                ref_dB_file = filename
+                ref_dB_file = df['filename'][idx]
                 ref_dB = df['dB'][idx]
 
         database['min_dB'][partID-1] = ref_dB
@@ -113,7 +113,7 @@ def process_site(database, file_):
         
 
 for file_ in filelist:
-    DATABASE = process_site(DATABASE.copy(deep = True), file_)
+    DATABASE = process_site(DATABASE.copy(deep = True)[0:15], file_)
 
 DATABASE.to_pickle(os.path.join(args.save_path,'database_pross.pkl'))
-DATABASE.to_csv(os.path.join(args.save_path,'database_pross.csv'))
+DATABASE.to_csv(os.path.join(args.save_path,'database_pross33.csv'))
