@@ -618,7 +618,7 @@ def surfaceRoughness (Sxx, norm ='global'):
 
 #=============================================================================
 def acousticDiversityIndex (Sxx, fn, fmin=0, fmax=20000, bin_step=1000, 
-                            dB_threshold=3, index="shannon", R_compatible = 'soundecology'):
+                            dB_threshold=3, index="shannon", R_compatible = False):
     
     """
     Acoustic Diversity Index : ADI
@@ -698,7 +698,7 @@ def acousticDiversityIndex (Sxx, fn, fmin=0, fmax=20000, bin_step=1000,
 
 #=============================================================================
 def acousticEvenessIndex (Sxx, fn, fmin=0, fmax=20000, bin_step=500, 
-                          dB_threshold=-50, R_compatible = 'soundecology'):
+                          dB_threshold=-50, R_compatible =False):
     
     """
     Acoustic Eveness Index : AEI
@@ -946,7 +946,7 @@ def soundscapeIndex (Sxx,fn,frange_bioPh=(1000,10000),frange_antroPh=(0,1000),
     return NDSI, ratioBA, antroPh, bioPh
 
 #=============================================================================
-def bioacousticsIndex (Sxx, fn, frange=(2000, 15000), R_compatible = 'soundecology'):
+def bioacousticsIndex (Sxx, fn, frange=(2000, 15000), R_compatible = False):
     """
     Bioacoustics Index
     
