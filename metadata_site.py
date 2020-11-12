@@ -88,7 +88,7 @@ def process_site(database, file_):
         for idx, filename in enumerate(df['filename']):
             if idx == 0:
                 ref_dB = df['dB'][idx]
-                ref_dB_file = filename
+                ref_dB_file = df['filename'][idx]
                 
 
             date = df['datetime'][idx]
