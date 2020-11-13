@@ -29,6 +29,7 @@ DATABASE['may'] = None
 DATABASE['jun'] = None
 DATABASE['jul'] = None
 DATABASE['aug'] = None
+DATABASE['sep'] = None
 DATABASE['error'] = None
 DATABASE['nb_file'] = None
 DATABASE['sr'] = None
