@@ -32,6 +32,7 @@ def metadata_generator(folder):
     Generate meta data for one folder (one site) and save in csv and pkl
 
     '''
+    if folder[-1] == '/'  : folder = folder.pop(-1)
     save_name = os.path.join(args.save_path, os.path.basename(folder))
 
     filelist = []
