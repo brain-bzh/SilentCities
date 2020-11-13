@@ -131,7 +131,8 @@ class Silent_dataset(Dataset):
 
 
 def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, database ,sample_rate=32000, batch_size=6):
-    file_refdB = database['ref_file'][int(site_ID) - 1]
+    partIDidx = database[database.partID == int(site_ID)].index[0]
+    file_refdB = database['ref_file'][partIDidx]
     if os.path.exists(os.path.join(meta_path, site_ID+'_metaloader.pkl')):
         meta_dataloader = pd.read_pickle(os.path.join(meta_path, site_ID+'_metaloader.pkl'))
         N = len(df_site['datetime'])

@@ -40,7 +40,9 @@ if not(os.path.isfile(checkpoint_path)):
 if args.database is None:
     raise(AttributeError("Must provide database"))
 
-DATABASE = pd.read_pickle(args.database)
+DATABASE = pd.read_pickle(args.database).reset_index(drop=True)
+if not(DATABASE.partID.dtype == 'int64'):
+    raise('error part ID (must be int64) not {}'.format(DATABASE.partID.dtype))
 
 meta_site = pd.read_pickle(os.path.join(
     args.metadata_folder, args.site+'.pkl')).reset_index(drop=True)
