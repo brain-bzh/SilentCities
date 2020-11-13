@@ -66,6 +66,7 @@ print(filelist)
 
 def process_site(database, file_):
     partID = int(os.path.basename(file_[:-4]))
+    
     error_date = False
     df = pd.read_pickle(file_)
     df_error = pd.read_pickle(file_[:-4]+'_error.pkl')
@@ -113,7 +114,7 @@ def process_site(database, file_):
         
 
 for file_ in filelist:
-    DATABASE = process_site(DATABASE.copy(deep = True)[0:15], file_)
+    DATABASE = process_site(DATABASE.copy(deep = True), file_)
 
 DATABASE.to_pickle(os.path.join(args.save_path,'database_pross.pkl'))
 DATABASE.to_csv(os.path.join(args.save_path,'database_pross.csv'))
