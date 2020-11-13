@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(description='Silent City Meta data genetor')
 parser.add_argument('--folder', default=None, type=str, help='Path to folder with wavefiles, will walk through subfolders')
 parser.add_argument('--save_path', default=None, type=str, help='Path to save meta data')
 parser.add_argument('--verbose', action='store_true', help='Verbose (default False = nothing printed)')
-parser.add_argument('--all', action='store_true', help='process all site. for dev')
+#parser.add_argument('--all', action='store_true', help='process all site. for dev')
 
 args = parser.parse_args()
 HDD =  args.folder
@@ -86,12 +86,12 @@ def metadata_generator(folder):
     Df.to_pickle(save_name+'.pkl')
     Df_error.to_pickle(save_name+'_error.pkl')
 
-if args.all :
-    for k in range(1,400):
-        print('{:04d}'.format(k))
-        metadata_generator('{:04d}'.format(k))
-else :
-    metadata_generator(args.folder)
+# if args.all :
+#     for k in range(1,400):
+#         print('{:04d}'.format(k))
+#         metadata_generator('{:04d}'.format(k))
+# else :
+metadata_generator(args.folder)
 
 
 
