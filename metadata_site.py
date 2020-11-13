@@ -56,7 +56,7 @@ filelist = []
 
 for root, dirs, files in os.walk(args.folder, topdown=False):
     for name in files:
-        if not('error' in name) and not('meta' in name) and name[-3:].casefold() == 'pkl':
+        if not('error' in name) and len(name) == 8 and name[-3:].casefold() == 'pkl':
             filelist.append(os.path.join(root, name))
 print(filelist)            
 filelist.sort()
