@@ -21,8 +21,8 @@ HDD =  args.folder
 # if args.all:
 #     HDD = ['/media/nicolas/Silent', '/media/nicolas/LaCie'] # list hdd if process all file and multiple HDD
 
-if args.folder is None and not(args.all):    
-    raise(AttributeError("Must provide either a file or a folder"))
+# if args.folder is None and not(args.all):    
+#     raise(AttributeError("Must provide either a file or a folder"))
     
 if not(os.path.exists(args.save_path)):
     os.mkdir(args.save_path)
