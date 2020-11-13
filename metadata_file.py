@@ -18,8 +18,8 @@ parser.add_argument('--verbose', action='store_true', help='Verbose (default Fal
 
 args = parser.parse_args()
 HDD =  args.folder
-if args.all:
-    HDD = ['/media/nicolas/Silent', '/media/nicolas/LaCie'] # list hdd if process all file and multiple HDD
+# if args.all:
+#     HDD = ['/media/nicolas/Silent', '/media/nicolas/LaCie'] # list hdd if process all file and multiple HDD
 
 if args.folder is None and not(args.all):    
     raise(AttributeError("Must provide either a file or a folder"))
