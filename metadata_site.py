@@ -42,13 +42,15 @@ nb_rec_month = {'03' : 4464,
                 '05' : 4464,
                 '06' : 4320,
                 '07' : 4464,
-                '08' : 4464}
+                '08' : 4464,
+                '09' : 4320,}
 month_cov = {'03' : 'mar',
                 '04' : 'apr',
                 '05' : 'may',
                 '06' : 'jun',
                 '07' : 'jul',
-                '08' : 'aug'}
+                '08' : 'aug',
+                '09' : 'sep'}
 
 print(DATABASE.columns)
 
@@ -84,7 +86,8 @@ def process_site(database, file_):
                     '05' : 0,
                     '06' : 0,
                     '07' : 0,
-                    '08' : 0}
+                    '08' : 0,
+                    '09' : 0}
 
 
         database['error'][partIDidx] = nb_error
