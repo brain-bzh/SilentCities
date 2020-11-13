@@ -19,6 +19,9 @@ if not(args.database[-3:] == 'csv') and args.database is not None:
     raise(AttributeError("Must provide CSV database"))
 DATABASE = pd.read_csv(args.database)
 DATABASE = DATABASE.loc[:, ~DATABASE.columns.str.contains('^Unnamed')]
+DATABASE = DATABASE.reset_index(drop=True)
+if not(DATABASE.partID.dtype == 'int64'):
+    raise('error part ID (must be int64) not {}'.format(DATABASE.partID.dtype))
 
 DATABASE['mar'] = None
 DATABASE['apr'] = None
@@ -66,7 +69,10 @@ print(filelist)
 
 def process_site(database, file_):
     partID = int(os.path.basename(file_[:-4]))
-    
+    try:
+        partIDidx = database[database.partID == partID].index[0]
+    except IndexError:
+        return database
     error_date = False
     df = pd.read_pickle(file_)
     df_error = pd.read_pickle(file_[:-4]+'_error.pkl')
@@ -81,10 +87,10 @@ def process_site(database, file_):
                     '08' : 0}
 
 
-        database['error'][partID-1] = nb_error
-        database['nb_file'][partID-1] = nb_file
-        database['sr'][partID-1] = df['sr'].mean()
-        database['len'][partID-1] = df['length'].mean() / database['sr'][partID-1]
+        database['error'][partIDidx] = nb_error
+        database['nb_file'][partIDidx] = nb_file
+        database['sr'][partIDidx] = df['sr'].mean()
+        database['len'][partIDidx] = df['length'].mean() / database['sr'][partIDidx]
 
         for idx, filename in enumerate(df['filename']):
             if idx == 0:
@@ -101,12 +107,12 @@ def process_site(database, file_):
                 ref_dB_file = df['filename'][idx]
                 ref_dB = df['dB'][idx]
 
-        database['min_dB'][partID-1] = ref_dB
-        database['ref_file'][partID-1] = ref_dB_file
+        database['min_dB'][partIDidx] = ref_dB
+        database['ref_file'][partIDidx] = ref_dB_file
         if error_date:
-            database['error_date'][partID-1] = True
+            database['error_date'][partIDidx] = True
         for key in nb_month.keys():
-            database[month_cov[key]][partID-1] =  nb_month[key]/nb_rec_month[key]*100
+            database[month_cov[key]][partIDidx] =  nb_month[key]/nb_rec_month[key]*100
 
     print(file_)
     
