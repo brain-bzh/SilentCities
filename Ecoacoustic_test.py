@@ -89,7 +89,6 @@ def metadata_generator(folder):
     Generate meta data for one folder (one site) and save in csv and pkl
 
     '''
-    print('toto2')
 
     filelist = []
     Df = pd.DataFrame(columns=['filename', 'datetime', 'length', 'sr'])
