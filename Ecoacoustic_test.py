@@ -72,10 +72,10 @@ def get_dataloader_site(path_wavfile, meta_site,Fmin, Fmax, batch_size=1):
             delta = datetime.timedelta(seconds=int((win*len_audio_s)))
             meta_dataloader = meta_dataloader.append({'filename': wavfile, 'sr': sr_in, 'start': (
                 win*len_audio_s), 'stop': ((win+1)*len_audio_s), 'len': len_file, 'date': meta_site['datetime'][idx] + delta}, ignore_index=True)
-        if duration % len_audio_s == float(0):
-            delta = datetime.timedelta(seconds=int((nb_win-1)*len_audio_s))
-            meta_dataloader = meta_dataloader.append({'filename':wavfile, 'sr': sr_in, 'start': (
-                duration - len_audio_s), 'stop': (duration), 'len': len_file, 'date': meta_site['datetime'][idx] + delta}, ignore_index=True)
+        # if duration % len_audio_s == float(0):
+        #     delta = datetime.timedelta(seconds=int((nb_win-1)*len_audio_s))
+        #     meta_dataloader = meta_dataloader.append({'filename': filelist[filelist_base.index(wavfile)], 'sr': sr_in, 'start': (
+        #         duration - len_audio_s), 'stop': (duration), 'len': len_file, 'date': meta_site['datetime'][idx] + delta}, ignore_index=True)
 
     site_set = Silent_dataset(meta_dataloader.reset_index(drop=True),Fmin, Fmax, ref_dB)
     site_set = torch.utils.data.DataLoader(
@@ -144,7 +144,7 @@ if __name__ == '__main__':
    
     NUM_CORE = multiprocessing.cpu_count()
     print(f'core numbers {NUM_CORE}')
-    path_audio_folder = '/Volumes/LaCie/0292/TEST'
+    path_audio_folder = '/Volumes/LaCie/0292'
     CSV_SAVE = 'save.csv'
     ref_dB = 23
     Fmin, Fmax = 100,20000
