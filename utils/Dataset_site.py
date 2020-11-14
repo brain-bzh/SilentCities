@@ -20,7 +20,7 @@ from utils.parameters import len_audio_s
 from utils.ecoacoustics import compute_NDSI, compute_NB_peaks, compute_ACI, compute_spectrogram
 from utils.alpha_indices import acoustic_events, acoustic_activity, spectral_entropy, bioacousticsIndex
 # from audio_processing import DATABASE
-from scipy.signal import butter, lfilter
+from scipy.signal import butter, filtfilt
 
 
 NUM_CORE = multiprocessing.cpu_count()
@@ -50,7 +50,7 @@ def butter_bandpass(lowcut, highcut, fs, order=5):
 
 def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
     b, a = butter_bandpass(lowcut, highcut, fs, order=order)
-    y = lfilter(b, a, data)
+    y = filtfilt(b, a, data)
     return y
 
 
