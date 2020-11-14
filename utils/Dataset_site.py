@@ -59,6 +59,7 @@ def compute_ecoacoustics(wavforme, sr, ref_mindb):
     Sxx, freqs = compute_spectrogram(wavforme, sr)
     Sxx_dB = 10*np.log10(Sxx)
     N = len(wavforme)
+    dB = 20*np.log10(np.std(wavforme))
     
     nbpeaks = compute_NB_peaks(Sxx, freqs, sr, slopes=(1/75,1/75))
     aci, _ = compute_ACI(Sxx, freqs, N, sr)
@@ -75,7 +76,7 @@ def compute_ecoacoustics(wavforme, sr, ref_mindb):
     Sxx, freqs = compute_spectrogram(wavforme, sr)
     Sxx_dB = 10*np.log10(Sxx)
     N = len(wavforme)
-    
+    dB_filt = 20*np.log10(np.std(wavforme))
     nbpeaks_filt = compute_NB_peaks(Sxx, freqs, sr, slopes=(1/75,1/75))
     aci_filt, _ = compute_ACI(Sxx, freqs, N, sr)
     ndsi_filt = compute_NDSI(wavforme,sr)
@@ -85,10 +86,10 @@ def compute_ecoacoustics(wavforme, sr, ref_mindb):
     _, _, ACT_filt = acoustic_activity(Sxx_dB, dB_threshold = ref_mindb[1]+6)
     EAS_filt,_,ECV_filt,EPS_filt,_,_ = spectral_entropy(Sxx, freqs)
 
-    indicateur = {'ndsi': ndsi, 'aci': aci, 
+    indicateur = {'dB' : dB, 'ndsi': ndsi, 'aci': aci, 
                     'nbpeaks': nbpeaks, 'BI' : bi, 'EVN' : sum(EVN), 
                     'ACT' : sum(ACT), 'EAS' : EAS, 
-                    'ECV' : ECV, 'EPS' : EPS, 'ndsi_filt': ndsi_filt, 'aci_filt': aci_filt, 
+                    'ECV' : ECV, 'EPS' : EPS,'dB_filt' : dB_filt, 'ndsi_filt': ndsi_filt, 'aci_filt': aci_filt, 
                     'nbpeaks_filt': nbpeaks_filt, 'BI_filt' : bi_filt, 'EVN_filt' : sum(EVN_filt), 
                     'ACT_filt' : sum(ACT_filt), 'EAS_filt' : EAS_filt, 
                     'ECV_filt' : ECV_filt, 'EPS_filt' : EPS_filt}
