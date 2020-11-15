@@ -63,8 +63,8 @@ def get_dataloader_site(path_wavfile, meta_site,Fmin, Fmax, batch_size=1):
     for idx, wavfile in tqdm(enumerate(meta_site['filename'])):
 
         len_file = meta_site['length'][idx]
-        sr_in = meta_site['sr'][idx]
-
+        sr_in = meta_site['sr'][idx
+]
         duration = len_file/sr_in
         nb_win = int(duration // len_audio_s )
 
@@ -102,7 +102,8 @@ def metadata_generator(folder):
     for idx, wavfile in tqdm(enumerate(filelist)):
         _, meta = utils.read_audio_hdr(wavfile, False) #meta data
 
-        if idx == 0 : sr, x = wav.read(wavfile)
+        # if idx == 0 : 
+        sr, x = wav.read(wavfile)
         Df = Df.append({'datetime': meta['datetime'], 'filename': wavfile, 'length' : len(x), 'sr' : sr}, ignore_index=True)
             
     Df = Df.sort_values('datetime')
