@@ -142,9 +142,9 @@ if __name__ == '__main__':
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
    
-    NUM_CORE = multiprocessing.cpu_count()
+    NUM_CORE = multiprocessing.cpu_count() - 2
     print(f'core numbers {NUM_CORE}')
-    path_audio_folder = '/media/nicolas/Silent/0010/0010_0/'
+    path_audio_folder = '/home/nicolas/Desktop/0010_0/0010_01/'
     CSV_SAVE = 'save.csv'
     ref_dB = 23
     Fmin, Fmax = 100,20000
@@ -175,6 +175,8 @@ if __name__ == '__main__':
             for key in info['ecoac'].keys():
                 df_site[key].append(float(info['ecoac'][key].numpy()[idx])) 
     df_site = pd.DataFrame(df_site)
+
+    df_site = df_site.sort_values('datetime').reset_index()
     df_site.to_csv(CSV_SAVE)
 
     for idx, k in enumerate(df_site['datetime']) :
