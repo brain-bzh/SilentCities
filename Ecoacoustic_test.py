@@ -60,11 +60,10 @@ def get_dataloader_site(path_wavfile, meta_site,Fmin, Fmax, batch_size=1):
     meta_dataloader = pd.DataFrame(
         columns=['filename', 'sr', 'start', 'stop'])
 
-    for idx, wavfile in tqdm(enumerate(meta_site['filename'])):
+    for idx, wavfile in enumerate(tqdm(meta_site['filename'])):
 
         len_file = meta_site['length'][idx]
-        sr_in = meta_site['sr'][idx
-]
+        sr_in = meta_site['sr'][idx]
         duration = len_file/sr_in
         nb_win = int(duration // len_audio_s )
 
@@ -99,7 +98,7 @@ def metadata_generator(folder):
             if name[-3:].casefold() == 'wav' and name[:2] != '._':
                 filelist.append(os.path.join(root, name))
         
-    for idx, wavfile in tqdm(enumerate(filelist)):
+    for idx, wavfile in enumerate(tqdm(filelist)):
         _, meta = utils.read_audio_hdr(wavfile, False) #meta data
 
         # if idx == 0 : 
@@ -143,9 +142,9 @@ if __name__ == '__main__':
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
    
-    NUM_CORE = multiprocessing.cpu_count()
+    NUM_CORE = multiprocessing.cpu_count() - 2
     print(f'core numbers {NUM_CORE}')
-    path_audio_folder = '/Volumes/LaCie/0292'
+    path_audio_folder = '/home/nicolas/Desktop/0010_0/0010_01/'
     CSV_SAVE = 'save.csv'
     ref_dB = 23
     Fmin, Fmax = 100,20000
@@ -163,12 +162,12 @@ if __name__ == '__main__':
     print(meta_file)
 
     print('Dataloader')
-    set_ = get_dataloader_site(path_audio_folder, meta_file, Fmin, Fmax, batch_size=8)
+    set_ = get_dataloader_site(path_audio_folder, meta_file, Fmin, Fmax, batch_size=NUM_CORE)
 
     print('processing')
 
     df_site = {'name':[],'start':[], 'datetime': [], 'dB':[], 'ndsi': [], 'aci': [], 'nbpeaks': [] , 'BI' : [], 'EVN' : [], 'ACT' : [], 'EAS':[], 'ECV' : [], 'EPS' : []}
-    for batch_idx, info in tqdm(enumerate(set_)):
+    for batch_idx, info in enumerate(tqdm(set_)):
         for idx, date_ in enumerate(info['date']):
             df_site['datetime'].append(str(date_)) 
             df_site['name'].append(str(info['name'][idx]))
@@ -176,6 +175,8 @@ if __name__ == '__main__':
             for key in info['ecoac'].keys():
                 df_site[key].append(float(info['ecoac'][key].numpy()[idx])) 
     df_site = pd.DataFrame(df_site)
+
+    df_site = df_site.sort_values('datetime').reset_index()
     df_site.to_csv(CSV_SAVE)
 
     for idx, k in enumerate(df_site['datetime']) :
