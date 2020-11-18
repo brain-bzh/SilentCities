@@ -13,11 +13,6 @@ database_file = '/bigdisk2/meta_silentcities/site/database_pross.pkl'
 source_dir = '/bigdisk1/silentcities/'
 target_dir = '/bigdisk2/meta_silentcities/ref_files/'
 
-
-database_file = '/home/nfarrugi/Nextcloud/SilentCities/consolidation/meta_silentcities/database_pross.pkl'  
-source_dir = '/home/nfarrugi/Documents/data/SilentCities/recordings/'
-target_dir = '/home/nfarrugi/Nextcloud/SilentCities/consolidation/ref_files/'
-
 # Create the target dir (will be silent if existing)
 os.makedirs(target_dir,exist_ok=True)
 
