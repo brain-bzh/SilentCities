@@ -44,7 +44,7 @@ for cursite in listsites:
         print("Found more than one matching ref file : ")
         print(finalpath)
     elif len(finalpath)==0:
-        print("Ref file not found !!")
+        print("Ref file {} not found for site {} !!".format(ref_file,cursite))
     else:
         print("Final file found at {}".format(finalpath[0]))
         
