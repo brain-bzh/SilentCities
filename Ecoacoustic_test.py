@@ -138,18 +138,29 @@ def compute_ecoacoustics(wavforme,sr, ref_mindb, Fmin, Fmax):
     
     return indicateur
 
+import argparse
+
+parser = argparse.ArgumentParser(description='Script to test ecoacoustic indices parameters')
+
+parser.add_argument('--site', default=None, type=str, help='Which site to process')
+parser.add_argument('--data_path', default='/bigdisk2/silentcities/', type=str, help='Path to save meta data')
+parser.add_argument('--save_path', default='/bigdisk2/meta_silentcities/tests_eco', type=str, help='Path to save meta data')
+parser.add_argument('--db', default=23, type=int, help='Reference dB for ACT and EVN')
+
+args = parser.parse_args()
+
+
 if __name__ == '__main__':
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
    
     NUM_CORE = multiprocessing.cpu_count() - 2
     print(f'core numbers {NUM_CORE}')
-    path_audio_folder = '/bigdisk2/silentcities/'
-    ref_dB = 23
-    site= '223'
-    CSV_SAVE = f'save_{ref_dB}_dB_site_{site}.csv'
+    path_audio_folder = args.data_path
+    ref_dB = args.db
+    site= args.site
+    CSV_SAVE = os.path.join(args.save_path,f'{ref_dB}_dB_site_{site}.csv')
     print(CSV_SAVE)
-    
     Fmin, Fmax = 100,20000
 
 
