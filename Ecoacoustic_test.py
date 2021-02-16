@@ -123,7 +123,7 @@ def compute_ecoacoustics(wavforme,sr, ref_mindb, Fmin, Fmax):
     
     nbpeaks = compute_NB_peaks(Sxx, freqs, sr, freqband = 200, normalization= True, slopes=(1/75,1/75))
     aci, _ = compute_ACI(Sxx, freqs, N, sr)
-    ndsi = compute_NDSI(wavforme,sr,windowLength = 1024, anthrophony=[1000,2000], biophony=[2000,11000])
+    ndsi = compute_NDSI(wavforme,sr,windowLength = 1024, anthrophony=[1000,5000], biophony=[5000,20000])
     bi = bioacousticsIndex(Sxx, freqs, frange=(5000, 20000), R_compatible = False)
     _, _, EVN,_  = acoustic_events(Sxx_dB, 1/(freqs[2]-freqs[1]), dB_threshold = ref_mindb+6)
     
