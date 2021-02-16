@@ -128,7 +128,7 @@ def compute_ecoacoustics(wavforme,sr, ref_mindb, Fmin, Fmax):
     _, _, EVN,_  = acoustic_events(Sxx_dB, 1/(freqs[2]-freqs[1]), dB_threshold = ref_mindb+6)
     
     _, _, ACT = acoustic_activity(Sxx_dB, dB_threshold = ref_mindb+6)
-    EAS,_,ECV,EPS,_,_ = spectral_entropy(Sxx, freqs, frange=None)
+    EAS,_,ECV,EPS,_,_ = spectral_entropy(Sxx, freqs, frange=(1000,10000))
 
 
     indicateur = {'dB' : dB, 'ndsi': ndsi, 'aci': aci, 
