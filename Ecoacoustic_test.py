@@ -144,9 +144,12 @@ if __name__ == '__main__':
    
     NUM_CORE = multiprocessing.cpu_count() - 2
     print(f'core numbers {NUM_CORE}')
-    path_audio_folder = '/home/nicolas/Desktop/0010_0/0010_01/'
-    CSV_SAVE = 'save.csv'
+    path_audio_folder = '/bigdisk2/silentcities/'
     ref_dB = 23
+    site= '223'
+    CSV_SAVE = f'save_{ref_dB}_dB_site_{site}.csv'
+    print(CSV_SAVE)
+    
     Fmin, Fmax = 100,20000
 
 
