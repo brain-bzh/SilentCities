@@ -14,8 +14,10 @@ run.sh
 
 ## NIFTI
 *.nii.gz
-
+*.wav
+*.WAV
 *.csv
+*.zip
 # Distribution / packaging
 .Python
 build/
