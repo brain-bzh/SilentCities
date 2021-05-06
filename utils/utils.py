@@ -55,10 +55,10 @@ def read_audio_hdr(strWAVFile,verbose=False):
             print('Audiomoth detected, ID is {}'.format(AMOid))
             print("Recording date and time is {}".format(curdate_time))
             
-        gain = float(words[11])
-        battery = words[16]
+        #gain = float(words[11])
+        #battery = words[16]
 
-        metadata = dict(time=curtime,date=curdate,id=AMOid,gain=gain,datetime=curdate_time)
+        metadata = dict(time=curtime,date=curdate,id=AMOid,datetime=curdate_time)
     else:
         strFile = os.path.basename(strWAVFile)
         strFile = strFile.split('_')
