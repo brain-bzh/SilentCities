@@ -36,8 +36,7 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
 
 
 class Silent_dataset(Dataset):
-    def __init__(self, meta_dataloader,  Fmin, Fmax, refdB):
-        self.ref_dB = refdB                
+    def __init__(self, meta_dataloader,  Fmin, Fmax):                     
         self.meta = meta_dataloader
         self.Fmin, self.Fmax = Fmin, Fmax
 
@@ -49,7 +48,7 @@ class Silent_dataset(Dataset):
                               offset=self.meta['start'][idx], duration=len_audio_s)
 
         
-        ecoac = compute_ecoacoustics(wav,sr, self.ref_dB,self.Fmin, self.Fmax)
+        ecoac = compute_ecoacoustics(wav,sr,self.Fmin, self.Fmax)
 
         return {'name': os.path.basename(filename), 'start': self.meta['start'][idx],
                                                         'date': self.meta['date'][idx].strftime('%Y%m%d_%H%M%S'), 
@@ -57,7 +56,7 @@ class Silent_dataset(Dataset):
     def __len__(self):
         return len(self.meta['filename'])
     
-def get_dataloader_site(path_wavfile, meta_site,Fmin, Fmax, ref_dB,batch_size=1):
+def get_dataloader_site(path_wavfile, meta_site,Fmin, Fmax,batch_size=1):
 
     meta_dataloader = pd.DataFrame(
         columns=['filename', 'sr', 'start', 'stop'])
@@ -78,7 +77,7 @@ def get_dataloader_site(path_wavfile, meta_site,Fmin, Fmax, ref_dB,batch_size=1)
         #     meta_dataloader = meta_dataloader.append({'filename': filelist[filelist_base.index(wavfile)], 'sr': sr_in, 'start': (
         #         duration - len_audio_s), 'stop': (duration), 'len': len_file, 'date': meta_site['datetime'][idx] + delta}, ignore_index=True)
 
-    site_set = Silent_dataset(meta_dataloader.reset_index(drop=True),Fmin, Fmax, ref_dB)
+    site_set = Silent_dataset(meta_dataloader.reset_index(drop=True),Fmin, Fmax)
     site_set = torch.utils.data.DataLoader(
         site_set, batch_size=batch_size, shuffle=False, num_workers=NUM_CORE)
 
@@ -113,7 +112,7 @@ def metadata_generator(folder,nfiles=None):
 
 
 
-def compute_ecoacoustics(wavforme,sr, ref_mindb, Fmin, Fmax):
+def compute_ecoacoustics(wavforme,sr, Fmin, Fmax):
 
     
     wavforme = butter_bandpass_filter(wavforme, Fmin, Fmax, fs = sr)
@@ -169,7 +168,6 @@ if __name__ == '__main__':
     parser.add_argument('--nfiles', default=1000, type=int, help='How many files per site (will take the first nfiles files)')
     parser.add_argument('--data_path', default='/bigdisk2/silentcities/', type=str, help='Path to save meta data')
     parser.add_argument('--save_path', default='/bigdisk2/meta_silentcities/tests_eco', type=str, help='Path to save meta data')
-    parser.add_argument('--db', default=23, type=int, help='Reference dB for ACT and EVN')
 
     args = parser.parse_args()
     
@@ -182,11 +180,10 @@ if __name__ == '__main__':
         nfiles=None
     path_audio_folder = os.path.join(args.data_path,site)
     print(path_audio_folder)
-    ref_dB = args.db
     
     savepath = args.save_path
-    CSV_SAVE = os.path.join(savepath,f'{ref_dB}_dB_site_{site}.csv')
-    figfile = os.path.join(savepath,f'{ref_dB}_site_{site}.html')
+    CSV_SAVE = os.path.join(savepath,f'site_{site}.csv')
+    figfile = os.path.join(savepath,f'site_{site}.html')
     meta_filename = os.path.join(savepath,f'metadata_{site}.pkl')
     #print(CSV_SAVE)
     Fmin, Fmax = 100,20000
@@ -213,7 +210,7 @@ if __name__ == '__main__':
     print(meta_file)
 
     print('Preparing Dataloader (which also means calculating all indices)')
-    set_ = get_dataloader_site(path_audio_folder, meta_file, Fmin, Fmax, ref_dB,batch_size=NUM_CORE)
+    set_ = get_dataloader_site(path_audio_folder, meta_file, Fmin, Fmax,batch_size=NUM_CORE)
 
     print('processing')
 
