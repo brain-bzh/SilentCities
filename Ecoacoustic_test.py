@@ -149,6 +149,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script to test ecoacoustic indices parameters')
 
     parser.add_argument('--site', default=None, type=str, help='Which site to process')
+    parser.add_argument('--nfiles', default=1000, type=int, help='How many files per site (will take the first nfiles files)')
     parser.add_argument('--data_path', default='/bigdisk2/silentcities/', type=str, help='Path to save meta data')
     parser.add_argument('--save_path', default='/bigdisk2/meta_silentcities/tests_eco', type=str, help='Path to save meta data')
     parser.add_argument('--db', default=23, type=int, help='Reference dB for ACT and EVN')
@@ -159,6 +160,7 @@ if __name__ == '__main__':
     NUM_CORE = multiprocessing.cpu_count() - 2
     print(f'core numbers {NUM_CORE}')
     site= args.site
+    nfiles=args.nfiles
     path_audio_folder = os.path.join(args.data_path,site)
     print(path_audio_folder)
     ref_dB = args.db
@@ -173,11 +175,15 @@ if __name__ == '__main__':
 
     wav_files = []
     for root, dirs, files in os.walk(path_audio_folder, topdown=False):
-        for name in files:
-            if name[-3:].casefold() == 'wav' and name[:2] != '._':
-                wav_files.append(os.path.join(root,name))
+        if len(wav_files) < nfiles:
+                
+            for name in files:
+                if name[-3:].casefold() == 'wav' and name[:2] != '._':
+                    wav_files.append(os.path.join(root,name))
+        else:
+            break
 
-    
+
     if os.path.isfile(meta_filename):
         print(f"Loading file {meta_filename}")
         meta_file = pd.read_pickle(meta_filename)
