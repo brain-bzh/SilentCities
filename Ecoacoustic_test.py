@@ -212,7 +212,6 @@ if __name__ == '__main__':
     print('Preparing Dataloader (which also means calculating all indices)')
     set_ = get_dataloader_site(path_audio_folder, meta_file, Fmin, Fmax,batch_size=NUM_CORE)
 
-    print('processing')
     """
     df_site = {'name':[],'start':[], 'datetime': [], 'dB':[], 'ndsi': [], 'aci': [], 'nbpeaks': [] , 'BI' : [], 'EVN' : [], 'ACT' : [], 'EAS':[], 'ECV' : [], 'EPS' : []}
     for batch_idx, info in enumerate(tqdm(set_)):
