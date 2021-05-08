@@ -212,8 +212,14 @@ if __name__ == '__main__':
     print('Preparing Dataloader (which also means calculating all indices)')
     set_ = get_dataloader_site(path_audio_folder, meta_file, Fmin, Fmax,batch_size=NUM_CORE)
 
-    """
-    df_site = {'name':[],'start':[], 'datetime': [], 'dB':[], 'ndsi': [], 'aci': [], 'nbpeaks': [] , 'BI' : [], 'EVN' : [], 'ACT' : [], 'EAS':[], 'ECV' : [], 'EPS' : []}
+    
+    df_site = {'name':[],'start':[], 'datetime': [], 'dB':[], 'ndsi': [], 'aci': [], 'nbpeaks': [] , 'BI' : [], 'EAS':[], 'ECV' : [], 'EPS' : []}
+
+    list_refdb = [5,10,15,20,25]
+    for ref_mindb in list_refdb:
+        df_site[f"ACT_{ref_mindb}"] = []
+        df_site[f"EVN_{ref_mindb}"] = []
+
     for batch_idx, info in enumerate(tqdm(set_)):
         for idx, date_ in enumerate(info['date']):
             df_site['datetime'].append(str(date_)) 
@@ -225,7 +231,8 @@ if __name__ == '__main__':
 
     df_site = df_site.sort_values('datetime').reset_index()
     df_site.to_csv(CSV_SAVE,index=False)
-
+    
+    """
     for idx, k in enumerate(df_site['datetime']) :
         df_site['datetime'][idx] = datetime.datetime.strptime(k, '%Y%m%d_%H%M%S')
 
