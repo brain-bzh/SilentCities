@@ -115,7 +115,7 @@ def metadata_generator(folder,nfiles=None):
 
 def compute_ecoacoustics(wavforme,sr, ref_mindb, Fmin, Fmax):
 
-    ref_mindb -=90 #int16 to -1 1
+    
     wavforme = butter_bandpass_filter(wavforme, Fmin, Fmax, fs = sr)
 
     Sxx, freqs = compute_spectrogram(wavforme, sr)
@@ -128,16 +128,32 @@ def compute_ecoacoustics(wavforme,sr, ref_mindb, Fmin, Fmax):
     aci, _ = compute_ACI(Sxx, freqs, N, sr)
     ndsi = compute_NDSI(wavforme,sr,windowLength = 1024, anthrophony=[1000,5000], biophony=[5000,20000])
     bi = bioacousticsIndex(Sxx, freqs, frange=(5000, 20000), R_compatible = False)
-    _, _, EVN,_  = acoustic_events(Sxx_dB, 1/(freqs[2]-freqs[1]), dB_threshold = ref_mindb+6)
     
-    _, _, ACT = acoustic_activity(Sxx_dB, dB_threshold = ref_mindb+6)
     EAS,_,ECV,EPS,_,_ = spectral_entropy(Sxx, freqs, frange=(1000,10000))
 
 
     indicateur = {'dB' : dB, 'ndsi': ndsi, 'aci': aci, 
-                    'nbpeaks': nbpeaks, 'BI' : bi, 'EVN' : sum(EVN), 
-                    'ACT' : sum(ACT), 'EAS' : EAS, 
+                    'nbpeaks': nbpeaks, 'BI' : bi,  'EAS' : EAS, 
                     'ECV' : ECV, 'EPS' : EPS}
+
+    ### specific code to calculate ACT and EVN with many ref Db
+    
+    list_refdb = [5,10,15,20,25]
+    for ref_mindb in list_refdb:
+
+        ref_mindb2 = ref_mindb -90 #int16 to -1 1
+        _, _, EVN,_  = acoustic_events(Sxx_dB, 1/(freqs[2]-freqs[1]), dB_threshold = ref_mindb2+6)    
+        _, _, ACT = acoustic_activity(Sxx_dB, dB_threshold = ref_mindb2+6)
+
+
+        indicateur[f"ACT_{ref_mindb}"] = sum(ACT)
+        indicateur[f"EVN_{ref_mindb}"] = sum(EVN)
+        
+        
+
+
+
+    #'EVN' : sum(EVN), 'ACT' : sum(ACT),
     
     return indicateur
 
