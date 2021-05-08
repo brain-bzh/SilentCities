@@ -3,6 +3,8 @@ import multiprocessing
 from tqdm import tqdm
 import datetime
 
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import librosa
 import pandas as pd
 import numpy as np
@@ -140,27 +142,30 @@ def compute_ecoacoustics(wavforme,sr, ref_mindb, Fmin, Fmax):
 
 import argparse
 
-parser = argparse.ArgumentParser(description='Script to test ecoacoustic indices parameters')
 
-parser.add_argument('--site', default=None, type=str, help='Which site to process')
-parser.add_argument('--data_path', default='/bigdisk2/silentcities/', type=str, help='Path to save meta data')
-parser.add_argument('--save_path', default='/bigdisk2/meta_silentcities/tests_eco', type=str, help='Path to save meta data')
-parser.add_argument('--db', default=23, type=int, help='Reference dB for ACT and EVN')
-
-args = parser.parse_args()
 
 
 if __name__ == '__main__':
-    import plotly.graph_objects as go
-    from plotly.subplots import make_subplots
+    parser = argparse.ArgumentParser(description='Script to test ecoacoustic indices parameters')
+
+    parser.add_argument('--site', default=None, type=str, help='Which site to process')
+    parser.add_argument('--data_path', default='/bigdisk2/silentcities/', type=str, help='Path to save meta data')
+    parser.add_argument('--save_path', default='/bigdisk2/meta_silentcities/tests_eco', type=str, help='Path to save meta data')
+    parser.add_argument('--db', default=23, type=int, help='Reference dB for ACT and EVN')
+
+    args = parser.parse_args()
+    
    
     NUM_CORE = multiprocessing.cpu_count() - 2
     print(f'core numbers {NUM_CORE}')
     path_audio_folder = args.data_path
     ref_dB = args.db
     site= args.site
-    CSV_SAVE = os.path.join(args.save_path,f'{ref_dB}_dB_site_{site}.csv')
-    print(CSV_SAVE)
+    savepath = args.save_path
+    CSV_SAVE = os.path.join(savepath,f'{ref_dB}_dB_site_{site}.csv')
+    figfile = os.path.join(savepath,f'{ref_dB}_site_{site}.html')
+    meta_filename = os.path.join(savepath,f'metadata_{site}.pkl')
+    #print(CSV_SAVE)
     Fmin, Fmax = 100,20000
 
 
@@ -171,11 +176,17 @@ if __name__ == '__main__':
                 wav_files.append(os.path.join(root,name))
 
 
-    print('metadata')
-    meta_file = metadata_generator(path_audio_folder)
+    if os.path.isfile(meta_filename):
+        print(f"Loading file {meta_filename}")
+        meta_file = pd.read_pickle(meta_filename)
+    else:
+        print('Reading metadata (listing all wave files) ')
+        meta_file = metadata_generator(path_audio_folder)
+        meta_file.to_pickle(meta_filename)
+    
     print(meta_file)
 
-    print('Dataloader')
+    print('Preparing Dataloader (which also means calculating all indices)')
     set_ = get_dataloader_site(path_audio_folder, meta_file, Fmin, Fmax, batch_size=NUM_CORE)
 
     print('processing')
@@ -196,7 +207,8 @@ if __name__ == '__main__':
     for idx, k in enumerate(df_site['datetime']) :
         df_site['datetime'][idx] = datetime.datetime.strptime(k, '%Y%m%d_%H%M%S')
 
-
+    print(df_site)
+    
     indic = ['dB', 'ndsi', 'aci', 'nbpeaks', 'BI', 'EVN', 'ACT', 'EAS', 'ECV', 'EPS']
 
     fig = make_subplots(rows=5, cols=2,print_grid=True, subplot_titles=indic,shared_xaxes='all')
@@ -205,5 +217,5 @@ if __name__ == '__main__':
                 row=(idx//2)+1, col=(idx%2)+1)
 
     fig.update(layout_showlegend=False)
-    fig.show()
-    print(df_site)
+    fig.write_html(figfile)
+    
