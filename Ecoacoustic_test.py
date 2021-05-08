@@ -213,7 +213,7 @@ if __name__ == '__main__':
     set_ = get_dataloader_site(path_audio_folder, meta_file, Fmin, Fmax,batch_size=NUM_CORE)
 
     print('processing')
-
+    """
     df_site = {'name':[],'start':[], 'datetime': [], 'dB':[], 'ndsi': [], 'aci': [], 'nbpeaks': [] , 'BI' : [], 'EVN' : [], 'ACT' : [], 'EAS':[], 'ECV' : [], 'EPS' : []}
     for batch_idx, info in enumerate(tqdm(set_)):
         for idx, date_ in enumerate(info['date']):
@@ -241,4 +241,4 @@ if __name__ == '__main__':
 
     fig.update(layout_showlegend=False)
     fig.write_html(figfile)
-    
+    """
