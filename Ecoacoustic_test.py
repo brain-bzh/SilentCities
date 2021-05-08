@@ -158,9 +158,11 @@ if __name__ == '__main__':
    
     NUM_CORE = multiprocessing.cpu_count() - 2
     print(f'core numbers {NUM_CORE}')
-    path_audio_folder = args.data_path
-    ref_dB = args.db
     site= args.site
+    path_audio_folder = os.path.join(args.data_path,site)
+    print(path_audio_folder)
+    ref_dB = args.db
+    
     savepath = args.save_path
     CSV_SAVE = os.path.join(savepath,f'{ref_dB}_dB_site_{site}.csv')
     figfile = os.path.join(savepath,f'{ref_dB}_site_{site}.html')
@@ -175,7 +177,7 @@ if __name__ == '__main__':
             if name[-3:].casefold() == 'wav' and name[:2] != '._':
                 wav_files.append(os.path.join(root,name))
 
-
+    
     if os.path.isfile(meta_filename):
         print(f"Loading file {meta_filename}")
         meta_file = pd.read_pickle(meta_filename)
