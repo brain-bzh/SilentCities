@@ -183,7 +183,7 @@ if __name__ == '__main__':
         else:
             break
 
-
+    print(len(wav_files))
     if os.path.isfile(meta_filename):
         print(f"Loading file {meta_filename}")
         meta_file = pd.read_pickle(meta_filename)
