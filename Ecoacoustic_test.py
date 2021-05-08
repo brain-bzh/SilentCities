@@ -85,7 +85,7 @@ def get_dataloader_site(path_wavfile, meta_site,Fmin, Fmax, batch_size=1):
     return site_set
 
 
-def metadata_generator(folder):
+def metadata_generator(folder,nfiles=None):
     '''
     Generate meta data for one folder (one site) and save in csv and pkl
 
@@ -99,7 +99,8 @@ def metadata_generator(folder):
         for name in files:
             if name[-3:].casefold() == 'wav' and name[:2] != '._':
                 filelist.append(os.path.join(root, name))
-        
+    if nfiles is not None:
+        filelist=filelist[:nfiles]
     for idx, wavfile in enumerate(tqdm(filelist)):
         _, meta = utils.read_audio_hdr(wavfile, False) #meta data
 
@@ -161,6 +162,8 @@ if __name__ == '__main__':
     print(f'core numbers {NUM_CORE}')
     site= args.site
     nfiles=args.nfiles
+    if nfiles==0:
+        nfiles=None
     path_audio_folder = os.path.join(args.data_path,site)
     print(path_audio_folder)
     ref_dB = args.db
@@ -173,7 +176,7 @@ if __name__ == '__main__':
     Fmin, Fmax = 100,20000
 
 
-    wav_files = []
+    """wav_files = []
     for root, dirs, files in os.walk(path_audio_folder, topdown=False):
         if len(wav_files) < nfiles:
                 
@@ -181,15 +184,14 @@ if __name__ == '__main__':
                 if name[-3:].casefold() == 'wav' and name[:2] != '._':
                     wav_files.append(os.path.join(root,name))
         else:
-            break
+            break"""
 
-    print(len(wav_files))
     if os.path.isfile(meta_filename):
         print(f"Loading file {meta_filename}")
         meta_file = pd.read_pickle(meta_filename)
     else:
         print('Reading metadata (listing all wave files) ')
-        meta_file = metadata_generator(path_audio_folder)
+        meta_file = metadata_generator(path_audio_folder,nfiles=nfiles)
         meta_file.to_pickle(meta_filename)
     
     print(meta_file)
