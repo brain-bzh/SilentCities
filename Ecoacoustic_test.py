@@ -57,7 +57,7 @@ class Silent_dataset(Dataset):
     def __len__(self):
         return len(self.meta['filename'])
     
-def get_dataloader_site(path_wavfile, meta_site,Fmin, Fmax, batch_size=1):
+def get_dataloader_site(path_wavfile, meta_site,Fmin, Fmax, ref_dB,batch_size=1):
 
     meta_dataloader = pd.DataFrame(
         columns=['filename', 'sr', 'start', 'stop'])
@@ -197,7 +197,7 @@ if __name__ == '__main__':
     print(meta_file)
 
     print('Preparing Dataloader (which also means calculating all indices)')
-    set_ = get_dataloader_site(path_audio_folder, meta_file, Fmin, Fmax, batch_size=NUM_CORE)
+    set_ = get_dataloader_site(path_audio_folder, meta_file, Fmin, Fmax, ref_dB,batch_size=NUM_CORE)
 
     print('processing')
 
