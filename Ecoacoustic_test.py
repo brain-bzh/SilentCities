@@ -103,9 +103,8 @@ def metadata_generator(folder,nfiles=None):
     for idx, wavfile in enumerate(tqdm(filelist)):
         _, meta = utils.read_audio_hdr(wavfile, False) #meta data
 
-        # if idx == 0 : 
-        sr, x = wav.read(wavfile)
-        Df = Df.append({'datetime': meta['datetime'], 'filename': wavfile, 'length' : len(x), 'sr' : sr}, ignore_index=True)
+        x, sr = librosa.load(wavfile,sr=None,mono=True)
+        Df = Df.append({'datetime': meta['datetime'], 'filename': wavfile, 'length' : len(x), 'sr' : sr,'dB' : 20*np.log10(np.std(x))}, ignore_index=True)
             
     Df = Df.sort_values('datetime')
     return(Df)
@@ -248,3 +247,10 @@ if __name__ == '__main__':
     fig.update(layout_showlegend=False)
     fig.write_html(figfile)
     """
+
+
+
+#### dans metadata_generator, ouvrir avec librosa.load (sr =None), calculer le dB
+#### dans la boucle de get_dataloader_site, rajouter une condition pour choper le minimum du dB
+### le mettre en paramètre de la fonction compute ecoacoustics
+### plus besoin du -90  ; faire varier dB_threshold = ref_mindb+variable    
