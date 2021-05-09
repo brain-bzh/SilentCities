@@ -212,7 +212,7 @@ if __name__ == '__main__':
     
     df_site = {'name':[],'start':[], 'datetime': [], 'dB':[], 'ndsi': [], 'aci': [], 'nbpeaks': [] , 'BI' : [], 'EAS':[], 'ECV' : [], 'EPS' : []}
 
-    list_offset = [5,10,15,20,25]
+    list_offset = [5,10,15,20,25,30,35]
     for offset in list_offset:
         df_site[f"ACT_ref+{offset}"] = []
         df_site[f"EVN_ref+{offset}"] = []
