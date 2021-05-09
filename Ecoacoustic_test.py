@@ -36,9 +36,10 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
 
 
 class Silent_dataset(Dataset):
-    def __init__(self, meta_dataloader,  Fmin, Fmax):                     
+    def __init__(self, meta_dataloader,  Fmin, Fmax,refdB):                     
         self.meta = meta_dataloader
         self.Fmin, self.Fmax = Fmin, Fmax
+        self.refdB = refdB
 
     def __getitem__(self, idx):
 
@@ -48,7 +49,7 @@ class Silent_dataset(Dataset):
                               offset=self.meta['start'][idx], duration=len_audio_s)
 
         
-        ecoac = compute_ecoacoustics(wav,sr,self.Fmin, self.Fmax)
+        ecoac = compute_ecoacoustics(wav,sr,self.Fmin, self.Fmax,self.refdB)
 
         return {'name': os.path.basename(filename), 'start': self.meta['start'][idx],
                                                         'date': self.meta['date'][idx].strftime('%Y%m%d_%H%M%S'), 
@@ -60,11 +61,14 @@ def get_dataloader_site(path_wavfile, meta_site,Fmin, Fmax,batch_size=1):
 
     meta_dataloader = pd.DataFrame(
         columns=['filename', 'sr', 'start', 'stop'])
-
+    refdB = meta_site.iloc[0]['dB']
     for idx, wavfile in enumerate(tqdm(meta_site['filename'])):
 
         len_file = meta_site['length'][idx]
         sr_in = meta_site['sr'][idx]
+        curdB = meta_site['dB'][idx]
+        if curdB < refdB:
+            refdB = curdB            
         duration = len_file/sr_in
         nb_win = int(duration // len_audio_s )
 
@@ -77,7 +81,7 @@ def get_dataloader_site(path_wavfile, meta_site,Fmin, Fmax,batch_size=1):
         #     meta_dataloader = meta_dataloader.append({'filename': filelist[filelist_base.index(wavfile)], 'sr': sr_in, 'start': (
         #         duration - len_audio_s), 'stop': (duration), 'len': len_file, 'date': meta_site['datetime'][idx] + delta}, ignore_index=True)
 
-    site_set = Silent_dataset(meta_dataloader.reset_index(drop=True),Fmin, Fmax)
+    site_set = Silent_dataset(meta_dataloader.reset_index(drop=True),Fmin, Fmax,refdB)
     site_set = torch.utils.data.DataLoader(
         site_set, batch_size=batch_size, shuffle=False, num_workers=NUM_CORE)
 
@@ -111,7 +115,7 @@ def metadata_generator(folder,nfiles=None):
 
 
 
-def compute_ecoacoustics(wavforme,sr, Fmin, Fmax):
+def compute_ecoacoustics(wavforme,sr, Fmin, Fmax,refdB):
 
     
     wavforme = butter_bandpass_filter(wavforme, Fmin, Fmax, fs = sr)
@@ -134,24 +138,18 @@ def compute_ecoacoustics(wavforme,sr, Fmin, Fmax):
                     'nbpeaks': nbpeaks, 'BI' : bi,  'EAS' : EAS, 
                     'ECV' : ECV, 'EPS' : EPS}
 
-    ### specific code to calculate ACT and EVN with many ref Db
+    ### specific code to calculate ACT and EVN with many ref Db offset
     
-    list_refdb = [5,10,15,20,25]
-    for ref_mindb in list_refdb:
+    list_offset = [5,10,15,20,25,30,35]
+    for cur_offset in list_offset:
 
-        ref_mindb2 = ref_mindb -90 #int16 to -1 1
-        _, _, EVN,_  = acoustic_events(Sxx_dB, 1/(freqs[2]-freqs[1]), dB_threshold = ref_mindb2+6)    
-        _, _, ACT = acoustic_activity(Sxx_dB, dB_threshold = ref_mindb2+6)
+        _, _, EVN,_  = acoustic_events(Sxx_dB, 1/(freqs[2]-freqs[1]), dB_threshold = refdB+cur_offset)    
+        _, ACT,_  = acoustic_activity(Sxx_dB, dB_threshold = refdB+cur_offset)
 
 
-        indicateur[f"ACT_{ref_mindb}"] = sum(ACT)
-        indicateur[f"EVN_{ref_mindb}"] = sum(EVN)
+        indicateur[f"ACT_ref+{cur_offset}"] = sum(ACT)
+        indicateur[f"EVN_ref+{cur_offset}"] = sum(EVN)
         
-        
-
-
-
-    #'EVN' : sum(EVN), 'ACT' : sum(ACT),
     
     return indicateur
 
@@ -214,10 +212,10 @@ if __name__ == '__main__':
     
     df_site = {'name':[],'start':[], 'datetime': [], 'dB':[], 'ndsi': [], 'aci': [], 'nbpeaks': [] , 'BI' : [], 'EAS':[], 'ECV' : [], 'EPS' : []}
 
-    list_refdb = [5,10,15,20,25]
-    for ref_mindb in list_refdb:
-        df_site[f"ACT_{ref_mindb}"] = []
-        df_site[f"EVN_{ref_mindb}"] = []
+    list_offset = [5,10,15,20,25]
+    for offset in list_offset:
+        df_site[f"ACT_ref+{offset}"] = []
+        df_site[f"EVN_ref+{offset}"] = []
 
     for batch_idx, info in enumerate(tqdm(set_)):
         for idx, date_ in enumerate(info['date']):
@@ -250,7 +248,6 @@ if __name__ == '__main__':
 
 
 
-#### dans metadata_generator, ouvrir avec librosa.load (sr =None), calculer le dB
 #### dans la boucle de get_dataloader_site, rajouter une condition pour choper le minimum du dB
 ### le mettre en paramètre de la fonction compute ecoacoustics
 ### plus besoin du -90  ; faire varier dB_threshold = ref_mindb+variable    
