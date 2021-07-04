@@ -18,6 +18,7 @@ from utils.ecoacoustics import compute_NDSI, compute_NB_peaks, compute_ACI, comp
 from utils.alpha_indices import acoustic_events, acoustic_activity, spectral_entropy, bioacousticsIndex
 from scipy.signal import butter, filtfilt
 from utils.parameters import len_audio_s
+from utils.utils import save_obj
 
 from audioset_tagging_cnn.inference import audio_tagging
 checkpoint_path = 'ResNet22_mAP=0.430.pth'
@@ -212,4 +213,4 @@ if __name__ == '__main__':
             
             
 
-    utils.utils.save_obj(df_site, pkl_save)
+    save_obj(df_site, pkl_save)
