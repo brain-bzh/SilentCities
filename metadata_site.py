@@ -17,11 +17,12 @@ if args.folder is None:
     raise(AttributeError("Must provide either a file or a folder"))
 if not(args.database[-3:] == 'csv') and args.database is not None:
     raise(AttributeError("Must provide CSV database"))
-DATABASE = pd.read_csv(args.database)
+DATABASE = pd.read_csv(args.database,sep=';')
 DATABASE = DATABASE.loc[:, ~DATABASE.columns.str.contains('^Unnamed')]
 DATABASE = DATABASE.reset_index(drop=True)
-if not(DATABASE.partID.dtype == 'int64'):
-    raise('error part ID (must be int64) not {}'.format(DATABASE.partID.dtype))
+#if not(DATABASE.partID.dtype == 'int64'):
+#    raise('error part ID (must be int64) not {}'.format(DATABASE.partID.dtype))
+print(DATABASE)
 
 DATABASE['mar'] = None
 DATABASE['apr'] = None
@@ -62,7 +63,7 @@ filelist = []
 
 for root, dirs, files in os.walk(args.folder, topdown=False):
     for name in files:
-        if not('error' in name) and len(name) == 8 and name[-3:].casefold() == 'pkl':
+        if not('error' in name) and name[-3:].casefold() == 'pkl':
             filelist.append(os.path.join(root, name))
 print(filelist)            
 filelist.sort()
