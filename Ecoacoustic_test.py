@@ -157,8 +157,10 @@ if __name__ == '__main__':
     path_audio_folder = args.data_path
     ref_dB = args.db
     site= args.site
-    CSV_SAVE = os.path.join(args.save_path,f'{ref_dB}_dB_site_{site}.csv')
+    savepath = args.save_path
+    CSV_SAVE = os.path.join(savepath,f'site_{site}.csv')
     print(CSV_SAVE)
+    meta_filename = os.path.join(savepath,f'metadata_{site}.pkl')
     Fmin, Fmax = 100,20000
 
 
@@ -168,9 +170,16 @@ if __name__ == '__main__':
             if name[-3:].casefold() == 'wav' and name[:2] != '._':
                 wav_files.append(os.path.join(root,name))
 
-
+    if os.path.isfile(meta_filename):
+        print(f"Loading file {meta_filename}")
+        meta_file = pd.read_pickle(meta_filename)
+    else:
+        print('Reading metadata (listing all wave files) ')
+        meta_file = metadata_generator(path_audio_folder)
+        meta_file.to_pickle(meta_filename)
     print('metadata')
     meta_file = metadata_generator(path_audio_folder)
+    figfile = os.path.join(savepath,f'site_{site}.html')
     print(meta_file)
 
     print('Dataloader')
@@ -203,5 +212,4 @@ if __name__ == '__main__':
                 row=(idx//2)+1, col=(idx%2)+1)
 
     fig.update(layout_showlegend=False)
-    fig.show()
-    print(df_site)
+    fig.write_html(figfile)
