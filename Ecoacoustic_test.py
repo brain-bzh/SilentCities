@@ -47,6 +47,7 @@ class Silent_dataset(Dataset):
                               offset=self.meta['start'][idx], duration=len_audio_s)
 
         
+        
         ecoac = compute_ecoacoustics(wav,sr, self.ref_dB,self.Fmin, self.Fmax)
 
         return {'name': os.path.basename(filename), 'start': self.meta['start'][idx],
@@ -112,8 +113,8 @@ def metadata_generator(folder):
 
 def compute_ecoacoustics(wavforme,sr, ref_mindb, Fmin, Fmax):
 
-    ref_mindb -=90 #int16 to -1 1
-    wavforme = butter_bandpass_filter(wavforme, Fmin, Fmax, fs = sr)
+    
+    #wavforme = butter_bandpass_filter(wavforme, Fmin, Fmax, fs = sr)
 
     Sxx, freqs = compute_spectrogram(wavforme, sr)
 
@@ -123,17 +124,14 @@ def compute_ecoacoustics(wavforme,sr, ref_mindb, Fmin, Fmax):
     
     nbpeaks = compute_NB_peaks(Sxx, freqs, sr, freqband = 200, normalization= True, slopes=(1/75,1/75))
     aci, _ = compute_ACI(Sxx, freqs, N, sr)
-    ndsi = compute_NDSI(wavforme,sr,windowLength = 1024, anthrophony=[1000,5000], biophony=[5000,20000])
-    bi = bioacousticsIndex(Sxx, freqs, frange=(5000, 20000), R_compatible = False)
-    _, _, EVN,_  = acoustic_events(Sxx_dB, 1/(freqs[2]-freqs[1]), dB_threshold = ref_mindb+6)
+    ndsi = compute_NDSI(wavforme,sr,windowLength = 1024, anthrophony=[100,5000], biophony=[5000,110000])
+    bi = bioacousticsIndex(Sxx, freqs, frange=(5000, 110000), R_compatible = False)
     
-    _, _, ACT = acoustic_activity(Sxx_dB, dB_threshold = ref_mindb+6)
-    EAS,_,ECV,EPS,_,_ = spectral_entropy(Sxx, freqs, frange=(1000,10000))
+    EAS,_,ECV,EPS,_,_ = spectral_entropy(Sxx, freqs, frange=(5000,110000))
 
 
     indicateur = {'dB' : dB, 'ndsi': ndsi, 'aci': aci, 
-                    'nbpeaks': nbpeaks, 'BI' : bi, 'EVN' : sum(EVN), 
-                    'ACT' : sum(ACT), 'EAS' : EAS, 
+                    'nbpeaks': nbpeaks, 'BI' : bi, 'EAS' : EAS, 
                     'ECV' : ECV, 'EPS' : EPS}
     
     return indicateur
@@ -180,7 +178,7 @@ if __name__ == '__main__':
 
     print('processing')
 
-    df_site = {'name':[],'start':[], 'datetime': [], 'dB':[], 'ndsi': [], 'aci': [], 'nbpeaks': [] , 'BI' : [], 'EVN' : [], 'ACT' : [], 'EAS':[], 'ECV' : [], 'EPS' : []}
+    df_site = {'name':[],'start':[], 'datetime': [], 'dB':[], 'ndsi': [], 'aci': [], 'nbpeaks': [] , 'BI' : [], 'EAS':[], 'ECV' : [], 'EPS' : []}
     for batch_idx, info in enumerate(tqdm(set_)):
         for idx, date_ in enumerate(info['date']):
             df_site['datetime'].append(str(date_)) 
@@ -197,7 +195,7 @@ if __name__ == '__main__':
         df_site['datetime'][idx] = datetime.datetime.strptime(k, '%Y%m%d_%H%M%S')
 
 
-    indic = ['dB', 'ndsi', 'aci', 'nbpeaks', 'BI', 'EVN', 'ACT', 'EAS', 'ECV', 'EPS']
+    indic = ['dB', 'ndsi', 'aci', 'nbpeaks', 'BI', 'EAS', 'ECV', 'EPS']
 
     fig = make_subplots(rows=5, cols=2,print_grid=True, subplot_titles=indic,shared_xaxes='all')
     for idx, k in enumerate(indic): 
