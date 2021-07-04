@@ -103,7 +103,12 @@ def metadata_generator(folder):
         _, meta = utils.read_audio_hdr(wavfile, False) #meta data
 
         # if idx == 0 : 
-        sr, x = wav.read(wavfile)
+        try:
+            sr, x = wav.read(wavfile)
+        except:
+            print('skipping short file')
+            continue
+
         Df = Df.append({'datetime': meta['datetime'], 'filename': wavfile, 'length' : len(x), 'sr' : sr}, ignore_index=True)
             
     Df = Df.sort_values('datetime')
@@ -159,6 +164,8 @@ if __name__ == '__main__':
     site= args.site
     savepath = args.save_path
     CSV_SAVE = os.path.join(savepath,f'site_{site}.csv')
+    pkl_save = os.path.join(savepath,f'site_{site}.pkl')
+
     print(CSV_SAVE)
     meta_filename = os.path.join(savepath,f'metadata_{site}.pkl')
     Fmin, Fmax = 100,20000
@@ -198,7 +205,8 @@ if __name__ == '__main__':
     df_site = pd.DataFrame(df_site)
 
     df_site = df_site.sort_values('datetime').reset_index()
-    df_site.to_csv(CSV_SAVE)
+    df_site.to_csv(CSV_SAVE,index=False)
+    df_site.to_pickle(pkl_save)
 
     for idx, k in enumerate(df_site['datetime']) :
         df_site['datetime'][idx] = datetime.datetime.strptime(k, '%Y%m%d_%H%M%S')
