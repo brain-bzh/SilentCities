@@ -105,7 +105,7 @@ def extract_daterange_eachhour(Df,hour_start,startday=None,endday=None):
 
 def extract_av_acrossdays(Df):
     Dflist = []
-    for hours in range(2):
+    for hours in range(24):
         for quart in [0,15,30,45]:
             for minutes in range(5):
                 hour_start = "{:02d}:{:02d}".format(hours,minutes+quart)
