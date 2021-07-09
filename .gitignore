@@ -11,7 +11,7 @@ run.sh
 *.pth.tar
 *.pt
 *.wav
-
+.DS_STORE*
 ## NIFTI
 *.nii.gz
 
