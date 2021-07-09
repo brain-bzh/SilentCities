@@ -165,10 +165,8 @@ if __name__ == '__main__':
     ref_dB = args.db
     site= args.site
     savepath = args.save_path
-    CSV_SAVE = os.path.join(savepath,f'site_{site}.csv')
-    pkl_save = os.path.join(savepath,f'site_{site}.pkl')
+    pkl_save = os.path.join(savepath,f'tagging_site_{site}.pkl')
 
-    print(CSV_SAVE)
     meta_filename = os.path.join(savepath,f'metadata_{site}.pkl')
     Fmin, Fmax = 100,20000
 
