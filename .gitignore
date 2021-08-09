@@ -18,6 +18,7 @@ run.sh
 *.WAV
 *.csv
 *.zip
+*.jpg
 # Distribution / packaging
 .Python
 build/
