@@ -70,7 +70,7 @@ def load_obj(name):
 import csv 
 
 # Load label
-with open('class_labels_indices.csv', 'r') as f:
+with open('audioset_tagging_cnn/class_labels_indices.csv', 'r') as f:
     reader = csv.reader(f, delimiter=',')
     lines = list(reader)
 
@@ -82,10 +82,6 @@ for i1 in range(1, len(lines)):
     ids.append(id)
     labels.append(label)
 
-from analysis import subset_probas
-
-fewlabels = ['Bird vocalization, bird call, bird song',
-'Caw','Bee, wasp, etc.','Vehicle','Speech']
 
 def return_preprocessed(Df):
     # data
@@ -177,17 +173,16 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Script to test ecoacoustic indices parameters')
 
-parser.add_argument('--site', default=None, type=str, help='Which site to process')
 parser.add_argument('--input', default=None, type=str, help='Path to pkl file')
 parser.add_argument('--save_path', default='/bigdisk2/meta_silentcities/tests_eco', type=str, help='Path to save output csv and pkl')
 
 args = parser.parse_args()
 
-site= args.site
+site= str.split(args.input,sep='_')[-1].split(sep='.')[0]
 savepath = args.save_path
-CSV_SAVE = os.path.join(savepath,f'average_site_{site}.csv')
-pkl_save = os.path.join(savepath,f'average_site_{site}.pkl')
-figfile  = os.path.join(savepath,f'average_figure_{site}.html')
+CSV_SAVE = os.path.join(savepath,f'average_tagging_site_{site}.csv')
+pkl_save = os.path.join(savepath,f'average_tagging_site_{site}.pkl')
+figfile  = os.path.join(savepath,f'average_tagging_figure_{site}.html')
 
 Df = load_obj_tag(args.input)
 
@@ -231,7 +226,7 @@ df_site.to_pickle(pkl_save)
 indic = fewlabels
 
 fig = make_subplots(rows=5, cols=3,print_grid=True, subplot_titles=indic,shared_xaxes='all')
-for idx, k in enumerate(indic): 
+for idx, k in enumerate(indic):
     fig.add_trace(go.Scatter(x=df_site['datetime'], y=df_site[k]),row=(idx//3+1), col=(idx%3)+1)
 
 
