@@ -147,11 +147,10 @@ def compute_ecoacoustics(wavforme, sr, Fmin, Fmax, refdB):
 
     list_offset = [5, 10, 15, 20, 25, 30, 35]
     for cur_offset in list_offset:
-        _, _, EVN, _ = acoustic_events(Sxx_dB, 1 / (freqs[2] - freqs[1]), dB_threshold=refdB + cur_offset, rejectDuration = sr/100)
+        _, _, EVN, _ = acoustic_events(Sxx_dB, 1 / (freqs[2] - freqs[1]), dB_threshold=refdB + cur_offset)
         _, ACT, _ = acoustic_activity(10*np.log10(np.abs(sig.hilbert(wavforme))**2), dB_threshold=refdB + cur_offset, axis=-1)
-
-        indicateur[f"ACT_ref+{cur_offset}"] = ACT/sr
-        indicateur[f"EVN_ref+{cur_offset}"] = sum(EVN)
+        indicateur[f"ACT_ref+{cur_offset}"] = np.sum(np.asarray(ACT))/sr
+        indicateur[f"EVN_ref+{cur_offset}"] = np.sum(np.asarray(EVN))
 
     return indicateur
 
@@ -167,10 +166,13 @@ if __name__ == '__main__':
     parser.add_argument('--data_path', default='/Volumes/NICOLAS', type=str, help='Path to save meta data')
     parser.add_argument('--save_path', default='/Users/nicolas/Documents/SilentCities/SilentCities/ecoacoustique', type=str,
                         help='Path to save meta data')
+    parser.add_argument('--reject_core', default=2,
+                        type=int,
+                        help='number of rejected core during the multiprocess calculation')
 
     args = parser.parse_args()
 
-    NUM_CORE = multiprocessing.cpu_count() - 2
+    NUM_CORE = multiprocessing.cpu_count() - args.reject_core
     print(f'core numbers {NUM_CORE}')
     site = args.site
     nfiles = args.nfiles
