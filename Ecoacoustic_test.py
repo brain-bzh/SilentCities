@@ -148,7 +148,7 @@ def compute_ecoacoustics(wavforme, sr, Fmin, Fmax, refdB):
     list_offset = [5, 10, 15, 20, 25, 30, 35]
     for cur_offset in list_offset:
         _, _, EVN, _ = acoustic_events(Sxx_dB, 1 / (freqs[2] - freqs[1]), dB_threshold=refdB + cur_offset)
-        _, ACT, _ = acoustic_activity(10*np.log10(np.abs(sig.hilbert(wavforme))**2), dB_threshold=refdB + cur_offset, axis=-1)
+        _, ACT, _ = acoustic_activity(10*np.log10(np.abs(wavforme)**2), dB_threshold=refdB + cur_offset, axis=-1)
         indicateur[f"ACT_ref+{cur_offset}"] = np.sum(np.asarray(ACT))/sr
         indicateur[f"EVN_ref+{cur_offset}"] = np.sum(np.asarray(EVN))
 
