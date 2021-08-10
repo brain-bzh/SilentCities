@@ -149,8 +149,8 @@ def compute_ACI(spectro, wave, j_bin, sr):
     j_bin: temporal size of the frame (in samples)
     """
     
-    #times = range(0, spectro.shape[1], j_bin) # relevant time indices
-    times = range(0, spectro.shape[1]-10, j_bin) # alternative time indices to follow the R code
+    times = range(0, spectro.shape[1], j_bin) # relevant time indices
+    #times = range(0, spectro.shape[1]-10, j_bin) # alternative time indices to follow the R code
 
     jspecs = [np.array(spectro[:,i:i+j_bin]) for i in times]  # sub-spectros of temporal size j
 

@@ -51,7 +51,6 @@ class Silent_dataset(Dataset):
 
     def __getitem__(self, idx):
         filename = self.meta['filename'][idx]
-
         wav, sr = librosa.load(filename, sr=None, mono=True,
                                offset=self.meta['start'][idx], duration=len_audio_s)
 
@@ -69,19 +68,27 @@ def get_dataloader_site(path_wavfile, meta_site, Fmin, Fmax, batch_size=1):
     meta_dataloader = pd.DataFrame(
         columns=['filename', 'sr', 'start', 'stop'])
     refdB = [meta_site.iloc[0]['dB'], meta_site.iloc[0]['filename']]
+
+    filelist = []
+    for root, dirs, files in os.walk(path_wavfile, topdown=False):
+        for name in files:
+            if name[-3:].casefold() == 'wav' and name[:2] != '._':
+                filelist.append(os.path.join(root, name))
+    filelist_base = [os.path.basename(file_) for file_ in filelist]
+
     for idx, wavfile in enumerate(tqdm(meta_site['filename'])):
 
         len_file = meta_site['length'][idx]
         sr_in = meta_site['sr'][idx]
         curdB = meta_site['dB'][idx]
         if curdB < refdB[0]:
-            refdB = [curdB, wavfile]
+            refdB = [curdB, filelist[filelist_base.index(wavfile)]]
         duration = len_file / sr_in
         nb_win = int(duration // len_audio_s)
 
         for win in range(nb_win):
             delta = datetime.timedelta(seconds=int((win * len_audio_s)))
-            meta_dataloader = meta_dataloader.append({'filename': wavfile, 'sr': sr_in, 'start': (
+            meta_dataloader = meta_dataloader.append({'filename': filelist[filelist_base.index(wavfile)], 'sr': sr_in, 'start': (
                     win * len_audio_s), 'stop': ((win + 1) * len_audio_s), 'len': len_file,
                                                       'date': meta_site['datetime'][idx] + delta}, ignore_index=True)
         # if duration % len_audio_s == float(0):
@@ -134,25 +141,29 @@ def compute_ecoacoustics(wavforme, sr, Fmin, Fmax, refdB):
     N = len(wavforme)
     dB = 20 * np.log10(np.std(wavforme))
 
-    nbpeaks = compute_NB_peaks(Sxx, freqs, sr, freqband=200, normalization=True, slopes=(1 / 75, 1 / 75))
-    aci, _ = compute_ACI(Sxx, freqs, N, sr)
+    # nbpeaks = compute_NB_peaks(Sxx, freqs, sr, freqband=200, normalization=True, slopes=(1 / 75, 1 / 75))
+
+    aci, _ = compute_ACI(Sxx, freqs, 1, sr) # Filtrage 2000 : 20000 (biophony)
     ndsi = compute_NDSI(wavforme, sr, windowLength=1024, anthrophony=[1000, 5000], biophony=[5000, 20000])
     bi = bioacousticsIndex(Sxx, freqs, frange=(5000, 20000), R_compatible=False)
 
     EAS, _, ECV, EPS, _, _ = spectral_entropy(Sxx, freqs, frange=(1000, 10000))
 
+    # indicateur = {'dB': dB, 'ndsi': ndsi, 'aci': aci,
+    #               'nbpeaks': nbpeaks, 'BI': bi, 'EAS': EAS,
+    #               'ECV': ECV, 'EPS': EPS}
     indicateur = {'dB': dB, 'ndsi': ndsi, 'aci': aci,
-                  'nbpeaks': nbpeaks, 'BI': bi, 'EAS': EAS,
+                  'BI': bi, 'EAS': EAS,
                   'ECV': ECV, 'EPS': EPS}
 
     ### specific code to calculate ACT and EVN with many ref Db offset
     LIST_OFFSET = [12, 18]
 
     for cur_offset in LIST_OFFSET:
-        _, _, EVN, _ = acoustic_events(Sxx_dB, 1 / (freqs[2] - freqs[1]), dB_threshold=refdB + cur_offset)
+        # _, _, EVN, _ = acoustic_events(Sxx_dB, 1 / (freqs[2] - freqs[1]), dB_threshold=refdB + cur_offset)
         _, ACT, _ = acoustic_activity(10*np.log10(np.abs(wavforme)**2), dB_threshold=refdB + cur_offset, axis=-1)
         indicateur[f"ACT_ref+{cur_offset}"] = np.sum(np.asarray(ACT))/sr
-        indicateur[f"EVN_ref+{cur_offset}"] = np.sum(np.asarray(EVN))
+        # indicateur[f"EVN_ref+{cur_offset}"] = np.sum(np.asarray(EVN))
 
     return indicateur
 
@@ -219,13 +230,13 @@ if __name__ == '__main__':
     print('Preparing Dataloader (which also means calculating all indices)')
     set_ = get_dataloader_site(path_audio_folder, meta_file, Fmin, Fmax, batch_size=NUM_CORE)
 
-    df_site = {'name': [], 'start': [], 'datetime': [], 'dB': [], 'ndsi': [], 'aci': [], 'nbpeaks': [], 'BI': [],
+    df_site = {'name': [], 'start': [], 'datetime': [], 'dB': [], 'ndsi': [], 'aci': [], 'BI': [],
                'EAS': [], 'ECV': [], 'EPS': []}
 
     LIST_OFFSET = [12, 18]
     for offset in LIST_OFFSET:
         df_site[f"ACT_ref+{offset}"] = []
-        df_site[f"EVN_ref+{offset}"] = []
+        # df_site[f"EVN_ref+{offset}"] = []
 
     for batch_idx, info in enumerate(tqdm(set_)):
         for idx, date_ in enumerate(info['date']):
