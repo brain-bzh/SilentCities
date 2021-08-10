@@ -119,10 +119,8 @@ def metadata_generator(folder, nfiles=None):
                         'dB': 20 * np.log10(np.std(x))}, ignore_index=True)
 
     Df = Df.sort_values('datetime')
-    if nfiles is not None :
-        return (Df.reset_index(drop=True)[:nfiles])
-    else :
-        Df.reset_index(drop=True)
+
+    Df.reset_index(drop=True)
 
 
 
@@ -204,11 +202,13 @@ if __name__ == '__main__':
 
     if os.path.isfile(meta_filename):
         print(f"Loading file {meta_filename}")
-        meta_file = pd.read_pickle(meta_filename)
+        meta_file = pd.read_pickle(meta_filename)[:nfiles]
     else:
         print('Reading metadata (listing all wave files) ')
-        meta_file = metadata_generator(path_audio_folder, nfiles=nfiles)
-        meta_file.to_pickle(meta_filename)
+        _meta_file = metadata_generator(path_audio_folder, nfiles=nfiles)
+        _meta_file.to_pickle(meta_filename)
+        meta_file = _meta_file[: nfiles]
+
 
     print(meta_file)
 
