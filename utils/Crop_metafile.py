@@ -11,6 +11,7 @@ parser.add_argument('--save_path', default='/Users/nicolas/Documents/SilentCitie
 parser.add_argument('--start_date', default='20200501_100100', type=str, help='start date in format YYYYMMDD_HHMMSS')
 parser.add_argument('--stop_date', default='20200502_100100', type=str, help='stop date in format YYYYMMDD_HHMMSS')
 args = parser.parse_args()
+
 Df = pd.read_pickle(args.path_pkl)
 Df = Df.sort_values('datetime').reset_index(drop=True)
 start = datetime.strptime(args.start_date, '%Y%m%d_%H%M%S')
