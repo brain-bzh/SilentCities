@@ -23,7 +23,7 @@ from utils.alpha_indices import acoustic_events, acoustic_activity, spectral_ent
 from scipy.signal import butter, filtfilt
 
 
-NUM_CORE = multiprocessing.cpu_count()
+NUM_CORE = multiprocessing.cpu_count() - 4
 print(f'core numbers {NUM_CORE}')
 
 DEVICE = torch.device(
