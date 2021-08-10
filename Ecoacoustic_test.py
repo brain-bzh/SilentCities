@@ -110,8 +110,7 @@ def metadata_generator(folder, nfiles=None):
         for name in files:
             if name[-3:].casefold() == 'wav' and name[:2] != '._':
                 filelist.append(os.path.join(root, name))
-    if nfiles is not None:
-        filelist = filelist[:nfiles]
+
     for idx, wavfile in enumerate(tqdm(filelist)):
         _, meta = utils.read_audio_hdr(wavfile, False)  # meta data
 
@@ -120,10 +119,15 @@ def metadata_generator(folder, nfiles=None):
                         'dB': 20 * np.log10(np.std(x))}, ignore_index=True)
 
     Df = Df.sort_values('datetime')
-    return (Df)
+    if nfiles is not None :
+        return (Df.reset_index(drop=True)[:nfiles])
+    else :
+        Df.reset_index(drop=True)
+
 
 
 def compute_ecoacoustics(wavforme, sr, Fmin, Fmax, refdB):
+
     wavforme = butter_bandpass_filter(wavforme, Fmin, Fmax, fs=sr)
 
     Sxx, freqs = compute_spectrogram(wavforme, sr)
@@ -144,9 +148,9 @@ def compute_ecoacoustics(wavforme, sr, Fmin, Fmax, refdB):
                   'ECV': ECV, 'EPS': EPS}
 
     ### specific code to calculate ACT and EVN with many ref Db offset
+    LIST_OFFSET = [12, 18]
 
-    list_offset = [5, 10, 15, 20, 25, 30, 35]
-    for cur_offset in list_offset:
+    for cur_offset in LIST_OFFSET:
         _, _, EVN, _ = acoustic_events(Sxx_dB, 1 / (freqs[2] - freqs[1]), dB_threshold=refdB + cur_offset)
         _, ACT, _ = acoustic_activity(10*np.log10(np.abs(wavforme)**2), dB_threshold=refdB + cur_offset, axis=-1)
         indicateur[f"ACT_ref+{cur_offset}"] = np.sum(np.asarray(ACT))/sr
@@ -214,8 +218,8 @@ if __name__ == '__main__':
     df_site = {'name': [], 'start': [], 'datetime': [], 'dB': [], 'ndsi': [], 'aci': [], 'nbpeaks': [], 'BI': [],
                'EAS': [], 'ECV': [], 'EPS': []}
 
-    list_offset = [5, 10, 15, 20, 25, 30, 35]
-    for offset in list_offset:
+    LIST_OFFSET = [12, 18]
+    for offset in LIST_OFFSET:
         df_site[f"ACT_ref+{offset}"] = []
         df_site[f"EVN_ref+{offset}"] = []
 
