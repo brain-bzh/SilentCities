@@ -186,7 +186,7 @@ if __name__ == '__main__':
     savepath = args.save_path
     CSV_SAVE = os.path.join(savepath, f'site_{site}.csv')
     figfile = os.path.join(savepath, f'site_{site}.html')
-    meta_filename = os.path.join(savepath, f'metadata_{site}.pkl')
+    meta_filename = os.path.join(savepath, f'{site}.pkl')
     # print(CSV_SAVE)
     Fmin, Fmax = 100, 20000
 
