@@ -37,7 +37,6 @@ def pop_dataframe(df, values, axis=0):
 print(start < stop)
 pop = []
 for idx, date in zip(tqdm(Df.index), Df['datetime']):
-
     if date > start and date < stop:
         pass
     else:
