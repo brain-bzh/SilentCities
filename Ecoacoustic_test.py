@@ -19,6 +19,7 @@ from utils.ecoacoustics import compute_NDSI, compute_NB_peaks, compute_ACI, comp
 from utils.alpha_indices import acoustic_events, acoustic_activity, spectral_entropy, bioacousticsIndex
 from scipy.signal import butter, filtfilt
 from utils.parameters import len_audio_s
+from utils import OctaveBand
 
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
@@ -43,9 +44,6 @@ class Silent_dataset(Dataset):
 
         dBref, sr = librosa.load(refdB[1], sr=None, mono=True)
         dBref = butter_bandpass_filter(dBref, Fmin, Fmax, fs=sr)
-        print('---------------'*10)
-        print(refdB[0], 20*np.log10(np.std(dBref)))
-        print('---------------' * 10)
 
         self.refdB = 20*np.log10(np.std(dBref))
 
@@ -65,9 +63,10 @@ class Silent_dataset(Dataset):
 
 
 def get_dataloader_site(path_wavfile, meta_site, Fmin, Fmax, batch_size=1):
+
     meta_dataloader = pd.DataFrame(
         columns=['filename', 'sr', 'start', 'stop'])
-    refdB = [meta_site.iloc[0]['dB'], meta_site.iloc[0]['filename']]
+    # refdB = [meta_site.iloc[0]['dB'], meta_site.iloc[0]['filename']]
 
     filelist = []
     for root, dirs, files in os.walk(path_wavfile, topdown=False):
@@ -75,7 +74,7 @@ def get_dataloader_site(path_wavfile, meta_site, Fmin, Fmax, batch_size=1):
             if name[-3:].casefold() == 'wav' and name[:2] != '._':
                 filelist.append(os.path.join(root, name))
     filelist_base = [os.path.basename(file_) for file_ in filelist]
-
+    refdB = [meta_site.iloc[0]['dB'], filelist[filelist_base.index(meta_site.iloc[0]['filename'])]]
     for idx, wavfile in enumerate(tqdm(meta_site['filename'])):
 
         len_file = meta_site['length'][idx]
@@ -122,7 +121,7 @@ def metadata_generator(folder, nfiles=None):
         _, meta = utils.read_audio_hdr(wavfile, False)  # meta data
 
         x, sr = librosa.load(wavfile, sr=None, mono=True)
-        Df = Df.append({'datetime': meta['datetime'], 'filename': wavfile, 'length': len(x), 'sr': sr,
+        Df = Df.append({'datetime': meta['datetime'], 'filename': os.path.basename(wavfile), 'length': len(x), 'sr': sr,
                         'dB': 20 * np.log10(np.std(x))}, ignore_index=True)
 
     Df = Df.sort_values('datetime')
@@ -133,7 +132,9 @@ def metadata_generator(folder, nfiles=None):
 
 def compute_ecoacoustics(wavforme, sr, Fmin, Fmax, refdB):
 
+
     wavforme = butter_bandpass_filter(wavforme, Fmin, Fmax, fs=sr)
+    spl, freq = OctaveBand.octavefilter(wavforme, fs=sr, fraction=1, order=4, limits=[100, 20000], show=0)
 
     Sxx, freqs = compute_spectrogram(wavforme, sr)
 
@@ -142,28 +143,39 @@ def compute_ecoacoustics(wavforme, sr, Fmin, Fmax, refdB):
     dB = 20 * np.log10(np.std(wavforme))
 
     # nbpeaks = compute_NB_peaks(Sxx, freqs, sr, freqband=200, normalization=True, slopes=(1 / 75, 1 / 75))
+    # wide : 2000 - 20000 : narrow : 5000 : 15000
+    min_anthro_bin = np.argmin([abs(e - 5000) for e in freqs])  # min freq of anthrophony in samples (or bin) (closest bin)
+    max_anthro_bin = np.argmin([abs(e - 15000) for e in freqs])  # max freq of anthrophony in samples (or bin)
+    aci_W, _ = compute_ACI(Sxx[:, min_anthro_bin:max_anthro_bin], freqs, 1, sr) # Filtrage 2000 : 20000 (biophony)
+    ndsi_W = compute_NDSI(wavforme, sr, windowLength=1024, anthrophony=[1000, 5000], biophony=[5000, 15000])
+    bi_W = bioacousticsIndex(Sxx, freqs, frange=(5000, 15000), R_compatible=False)
 
-    aci, _ = compute_ACI(Sxx, freqs, 1, sr) # Filtrage 2000 : 20000 (biophony)
-    ndsi = compute_NDSI(wavforme, sr, windowLength=1024, anthrophony=[1000, 5000], biophony=[5000, 20000])
-    bi = bioacousticsIndex(Sxx, freqs, frange=(5000, 20000), R_compatible=False)
+    min_anthro_bin = np.argmin([abs(e - 2000) for e in freqs])  # min freq of anthrophony in samples (or bin) (closest bin)
+    max_anthro_bin = np.argmin([abs(e - 20000) for e in freqs])  # max freq of anthrophony in samples (or bin)
+    aci_N, _ = compute_ACI(Sxx[:, min_anthro_bin:max_anthro_bin], freqs, 1, sr)  # Filtrage 2000 : 20000 (biophony)
+    ndsi_N = compute_NDSI(wavforme, sr, windowLength=1024, anthrophony=[1000, 2000], biophony=[2000, 20000])
+    bi_N = bioacousticsIndex(Sxx, freqs, frange=(2000, 20000), R_compatible=False)
 
-    EAS, _, ECV, EPS, _, _ = spectral_entropy(Sxx, freqs, frange=(1000, 10000))
+    # wide 1000 - 20000 narrow 5000 - 15000
 
-    # indicateur = {'dB': dB, 'ndsi': ndsi, 'aci': aci,
-    #               'nbpeaks': nbpeaks, 'BI': bi, 'EAS': EAS,
-    #               'ECV': ECV, 'EPS': EPS}
-    indicateur = {'dB': dB, 'ndsi': ndsi, 'aci': aci,
-                  'BI': bi, 'EAS': EAS,
-                  'ECV': ECV, 'EPS': EPS}
+
+    EAS_N, _, ECV_N, EPS_N, _, _ = spectral_entropy(Sxx, freqs, frange=(5000, 15000))
+    EAS_W, _, ECV_W, EPS_W, _, _ = spectral_entropy(Sxx, freqs, frange=(1000, 20000))
+
 
     ### specific code to calculate ACT and EVN with many ref Db offset
-    LIST_OFFSET = [12, 18]
 
-    for cur_offset in LIST_OFFSET:
-        # _, _, EVN, _ = acoustic_events(Sxx_dB, 1 / (freqs[2] - freqs[1]), dB_threshold=refdB + cur_offset)
-        _, ACT, _ = acoustic_activity(10*np.log10(np.abs(wavforme)**2), dB_threshold=refdB + cur_offset, axis=-1)
-        indicateur[f"ACT_ref+{cur_offset}"] = np.sum(np.asarray(ACT))/sr
-        # indicateur[f"EVN_ref+{cur_offset}"] = np.sum(np.asarray(EVN))
+    _, ACT, _ = acoustic_activity(10*np.log10(np.abs(wavforme)**2), dB_threshold=refdB + 12, axis=-1)
+    ACT = np.sum(np.asarray(ACT))/sr
+
+    indicateur = {'dB': dB, 'ndsi_N': ndsi_N, 'aci_N': aci_N,
+                  'BI_N': bi_N, 'EAS_N': EAS_N,
+                  'ECV_N': ECV_N, 'EPS_N': EPS_N,'ndsi_W': ndsi_W, 'aci_W': aci_W,
+                  'BI_W': bi_W, 'EAS_W': EAS_W,
+                  'ECV_W': ECV_W, 'EPS_W': EPS_W, 'ACT':ACT,
+                  'POWERB_126':spl[0], 'POWERB_251':spl[1], 'POWERB_501':spl[2], 'POWERB_1k':spl[3], 'POWERB_2k':spl[4], 'POWERB_4k':spl[5], 'POWERB_8k':spl[6], 'POWERB_16k':spl[7]}
+
+    # indicateur[f"EVN_ref+{cur_offset}"] = np.sum(np.asarray(EVN))
 
     return indicateur
 
@@ -173,13 +185,13 @@ import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script to test ecoacoustic indices parameters')
 
-    parser.add_argument('--site', default=None, type=str, help='Which site to process')
+    parser.add_argument('--site', default=None, type=int, help='Which site to process')
     parser.add_argument('--nfiles', default=1000, type=int,
                         help='How many files per site (will take the first nfiles files)')
-    parser.add_argument('--data_path', default='/Volumes/NICOLAS', type=str, help='Path to save meta data')
-    parser.add_argument('--save_path', default='/Users/nicolas/Documents/SilentCities/SilentCities/ecoacoustique', type=str,
+    parser.add_argument('--data_path', default='fortesteco', type=str, help='Path to save meta data')
+    parser.add_argument('--save_path', default='/Users/nicolas/Documents/SilentCities/SilentCities/ecoacoustique/NEW', type=str,
                         help='Path to save meta data')
-    parser.add_argument('--reject_core', default=2,
+    parser.add_argument('--reject_core', default=1,
                         type=int,
                         help='number of rejected core during the multiprocess calculation')
 
@@ -188,11 +200,12 @@ if __name__ == '__main__':
     NUM_CORE = multiprocessing.cpu_count() - args.reject_core
     print(f'core numbers {NUM_CORE}')
     site = args.site
+    # for site in tqdm([4, 11, 25, 36, 38, 52, 61, 62, 77, 87, 115, 120, 121, 132, 153, 158, 159, 190, 229, 234, 276, 292, 346, 371, 388]):
+    site = f"{site:04d}"
     nfiles = args.nfiles
     if nfiles == 0:
         nfiles = None
     path_audio_folder = os.path.join(args.data_path, site)
-    print(path_audio_folder)
 
     savepath = args.save_path
     CSV_SAVE = os.path.join(savepath, f'site_{site}.csv')
@@ -224,21 +237,18 @@ if __name__ == '__main__':
         _meta_file.to_pickle(meta_filename)
         meta_file = _meta_file[: nfiles]
 
-
-    print(meta_file)
-
     print('Preparing Dataloader (which also means calculating all indices)')
-    set_ = get_dataloader_site(path_audio_folder, meta_file, Fmin, Fmax, batch_size=NUM_CORE)
+    set_ = get_dataloader_site(path_audio_folder, meta_file, Fmin, Fmax, batch_size=int(NUM_CORE*2))
 
-    df_site = {'name': [], 'start': [], 'datetime': [], 'dB': [], 'ndsi': [], 'aci': [], 'BI': [],
-               'EAS': [], 'ECV': [], 'EPS': []}
+    df_site = {'name': [], 'start': [], 'datetime': [], 'dB': [], 'ndsi_N': [], 'aci_N': [],
+                    'BI_N': [], 'EAS_N': [],
+                    'ECV_N': [], 'EPS_N': [] ,'ndsi_W': [], 'aci_W': [],
+                    'BI_W': [], 'EAS_W': [],
+                    'ECV_W': [], 'EPS_W': [], 'ACT':[],
+                'POWERB_126':[], 'POWERB_251':[], 'POWERB_501':[], 'POWERB_1k':[], 'POWERB_2k':[], 'POWERB_4k':[], 'POWERB_8k':[], 'POWERB_16k':[]}
 
-    LIST_OFFSET = [12, 18]
-    for offset in LIST_OFFSET:
-        df_site[f"ACT_ref+{offset}"] = []
-        # df_site[f"EVN_ref+{offset}"] = []
 
-    for batch_idx, info in enumerate(tqdm(set_)):
+    for batch_idx, info in enumerate(set_):
         for idx, date_ in enumerate(info['date']):
             df_site['datetime'].append(str(date_))
             df_site['name'].append(str(info['name'][idx]))
@@ -267,7 +277,3 @@ if __name__ == '__main__':
     fig.update(layout_showlegend=False)
     fig.write_html(figfile)
     """
-
-####   dans la boucle de get_dataloader_site, rajouter une condition pour choper le minimum du dB
-### le mettre  e n paramètre de la fonction compute ecoacoustics
-### plus besoin du -90  ; faire varier dB_threshold = ref_mindb+variable
