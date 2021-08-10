@@ -120,7 +120,7 @@ def metadata_generator(folder, nfiles=None):
 
     Df = Df.sort_values('datetime')
 
-    Df.reset_index(drop=True)
+    return Df.reset_index(drop=True)
 
 
 
@@ -230,6 +230,7 @@ if __name__ == '__main__':
             df_site['start'].append(float(info['start'][idx]))
             for key in info['ecoac'].keys():
                 df_site[key].append(float(info['ecoac'][key].numpy()[idx]))
+
     df_site = pd.DataFrame(df_site)
 
     df_site = df_site.sort_values('datetime').reset_index()
