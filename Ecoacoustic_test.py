@@ -134,7 +134,7 @@ def compute_ecoacoustics(wavforme, sr, Fmin, Fmax, refdB):
 
 
     wavforme = butter_bandpass_filter(wavforme, Fmin, Fmax, fs=sr)
-    spl, freq = OctaveBand.octavefilter(wavforme, fs=sr, fraction=1, order=4, limits=[100, 20000], show=0)
+    dB_band, freq = OctaveBand.octavefilter(wavforme, fs=sr, fraction=1, order=4, limits=[100, 20000], show=0)
 
     Sxx, freqs = compute_spectrogram(wavforme, sr)
 
@@ -173,7 +173,7 @@ def compute_ecoacoustics(wavforme, sr, Fmin, Fmax, refdB):
                   'ECV_N': ECV_N, 'EPS_N': EPS_N,'ndsi_W': ndsi_W, 'aci_W': aci_W,
                   'BI_W': bi_W, 'EAS_W': EAS_W,
                   'ECV_W': ECV_W, 'EPS_W': EPS_W, 'ACT':ACT,
-                  'POWERB_126':spl[0], 'POWERB_251':spl[1], 'POWERB_501':spl[2], 'POWERB_1k':spl[3], 'POWERB_2k':spl[4], 'POWERB_4k':spl[5], 'POWERB_8k':spl[6], 'POWERB_16k':spl[7]}
+                  'POWERB_126':dB_band[0], 'POWERB_251':dB_band[1], 'POWERB_501':dB_band[2], 'POWERB_1k':dB_band[3], 'POWERB_2k':dB_band[4], 'POWERB_4k':dB_band[5], 'POWERB_8k':dB_band[6], 'POWERB_16k':dB_band[7]}
 
     # indicateur[f"EVN_ref+{cur_offset}"] = np.sum(np.asarray(EVN))
 
