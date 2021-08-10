@@ -247,8 +247,8 @@ if __name__ == '__main__':
                 df_site[key].append(float(info['ecoac'][key].numpy()[idx]))
 
     df_site = pd.DataFrame(df_site)
-
-    df_site = df_site.sort_values('datetime').reset_index()
+    df_site.to_csv(CSV_SAVE, index=False)
+    df_site = df_site.sort_values('datetime').reset_index(drop = True)
     df_site.to_csv(CSV_SAVE, index=False)
 
     """
