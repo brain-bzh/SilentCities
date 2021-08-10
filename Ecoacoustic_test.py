@@ -202,7 +202,11 @@ if __name__ == '__main__':
 
     if os.path.isfile(meta_filename):
         print(f"Loading file {meta_filename}")
-        meta_file = pd.read_pickle(meta_filename)[:nfiles]
+        _meta_file = pd.read_pickle(meta_filename)
+        _meta_file = _meta_file.sort_values('datetime')
+        _meta_file = _meta_file.reset_index(drop=True)
+        meta_file = _meta_file[:nfiles]
+
     else:
         print('Reading metadata (listing all wave files) ')
         _meta_file = metadata_generator(path_audio_folder, nfiles=nfiles)
