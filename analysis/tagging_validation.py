@@ -131,7 +131,7 @@ for cursubcat in macro_cat.keys():
 
     curDf = Df_new[curlabels]
 
-    Df_new[cursubcat] = curDf.mean(axis=1)
+    Df_new[cursubcat] = curDf.max(axis=1)
 
 
 
