@@ -146,3 +146,6 @@ dmypy.json
 .pyre/
 tests.ipynb
 test.csv
+*.DS_Store
+*.html
+*.xlsx
