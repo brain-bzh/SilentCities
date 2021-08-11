@@ -95,6 +95,7 @@ def metadata_generator(folder):
 #         print('{:04d}'.format(k))
 #         metadata_generator('{:04d}'.format(k))
 # else :
+
 metadata_generator(args.folder)
 
 
