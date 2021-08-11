@@ -10,10 +10,21 @@ import datetime
 import pickle 
 import csv 
 
-### List of labels to keep
 
-fewlabels = ['Bird vocalization, bird call, bird song',
-'Caw','Crow','Owl','Grunt','Speech','Bee, wasp, etc.','Cricket','Rain','Thunderstorm','Aircraft','Helicopter','Car']
+
+## opening class list 
+Df_classes = pd.read_csv('analysis/TaggingCategory.csv')
+
+dict_allcats = {}
+fewlabels = []
+for curcat in Df_classes.columns:
+    list_curcat = []
+    for idx, curclass in enumerate(Df_classes[curcat]):
+        if curclass is not np.nan:
+            list_curcat.append(curclass)
+            fewlabels.append(curclass)
+    
+    dict_allcats[curcat] = list_curcat
 
 def linear(Df):
 
@@ -33,7 +44,6 @@ for i1 in range(1, len(lines)):
     ids.append(id)
     labels.append(label)
 
-
 def return_preprocessed(Df):
     # data
     allprobas = np.stack(Df['clipwise_output'])
@@ -46,10 +56,17 @@ def subset_probas(Df,search_labels):
     allprobas,_,_ = return_preprocessed(Df)
 
     ind_list = []
+    newlabellist = []
+    notfound = []
     for curlabel in search_labels:
-        ind_list.append(int(np.argwhere([c==curlabel for c in labels])))
+        try:
+            ind_list.append(int(np.argwhere([c==curlabel for c in labels])))
+            newlabellist.append(curlabel)
+        except:
+            print(f"Label {curlabel} not present in PANN training")
+            notfound.append(curlabel)
 
-    return allprobas[:,ind_list]    
+    return allprobas[:,ind_list],newlabellist,notfound   
 
 # Audio Tagging
 
@@ -67,14 +84,13 @@ args = parser.parse_args()
 
 site= str.split(args.input,sep='_')[-1].split(sep='.')[0]
 savepath = args.save_path
-CSV_SAVE = os.path.join(savepath,f'average_tagging_site_{site}.csv')
-pkl_save = os.path.join(savepath,f'average_tagging_site_{site}.pkl')
-figfile  = os.path.join(savepath,f'average_tagging_figure_{site}.html')
+CSV_SAVE = os.path.join(savepath,f'tagging_site_{site}.csv')
 
 Df = load_obj_tag(args.input)
+print(Df.columns)
+probas,newlabellist,notfound = subset_probas(Df,fewlabels)
 
-probas = subset_probas(Df,fewlabels)
-
+fewlabels = newlabellist
 # create Dataframe from Dict
 
 Df_new = pd.DataFrame()
@@ -82,4 +98,4 @@ for i,curlab in enumerate(fewlabels):
     Df_new[curlab] = probas[:,i]
 ### Saving 
 
-Df_new.to_csv(CSV_SAVE)
+Df_new.to_csv(CSV_SAVE,index=False)
