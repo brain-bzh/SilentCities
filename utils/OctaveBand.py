@@ -53,7 +53,7 @@ def octavefilter(x, fs, fraction=1, order=6, limits=None, show=0, sigbands =0):
         for idx in range(len(freq)):
             sd = signal.decimate(x, factor[idx])
             y = signal.sosfilt(sos[idx], sd)
-            spl[idx] = 20 * np.log10(np.std(y) / 2e-5)
+            spl[idx] = 20 * np.log10(np.std(y)) # /2e-5
             xb.append(signal.resample_poly(y,factor[idx],1))
         return spl.tolist(), freq, xb
     else:
