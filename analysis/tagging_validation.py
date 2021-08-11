@@ -87,15 +87,54 @@ savepath = args.save_path
 CSV_SAVE = os.path.join(savepath,f'tagging_site_{site}.csv')
 
 Df = load_obj_tag(args.input)
-print(Df.columns)
 probas,newlabellist,notfound = subset_probas(Df,fewlabels)
 
 fewlabels = newlabellist
-# create Dataframe from Dict
+
+### Lets first generate a csv with all the probabilities, no grouping
+# 
+# # create Dataframe from Dict
 
 Df_new = pd.DataFrame()
-for i,curlab in enumerate(fewlabels):
-    Df_new[curlab] = probas[:,i]
+Df_new['name'] = Df['name']
+Df_new['start'] = Df['start']
+#for i,curlab in enumerate(fewlabels):
+#    Df_new[curlab] = probas[:,i]
 ### Saving 
 
+
+### Now let s generate another csv to have the matching with categories of the manual identification protocol
+### to do that, we take the maximum probability in the subcategory identified by the dictionnary 
+### We parse using the dictionnary dict_allcats
+
+for cursubcat in dict_allcats.keys():
+    curlabels = dict_allcats[cursubcat]
+
+    probas_sub,newlabellist_sub,_ = subset_probas(Df,curlabels)
+
+    probas_max = np.max(probas_sub,axis=1)
+
+    cursublabel = 'tag_' + cursubcat
+
+    Df_new[cursublabel] = probas_max
+
+### And Finally let's do an estimation of BioPhony, Antropophony and Geophony level using audio tagging results 
+### For that, we group the categories accordingly : 
+
+macro_cat = {'geophony':['Wind', 'Rain', 'River', 'Wave', 'Thunder'],'biophony': ['Bird', 'Amphibian', 'Insect', 'Mammal', 'Reptile'], 'anthropophony': ['Walking', 'Cycling', 'Beep', 'Car', 'Car honk', 'Motorbike', 'Plane', 'Helicoptere', 'Boat', 'Others_motors', 'Shoot', 'Bell', 'Talking', 'Music', 'Dog bark', 'Kitchen sounds', 'Rolling shutter']}
+
+
+### and now we will calculate the average probability in each of the three macro categories 
+
+for cursubcat in macro_cat.keys():
+    curlabels = ['tag_' + i for i in macro_cat[cursubcat]]
+
+    curDf = Df_new[curlabels]
+
+    Df_new[cursubcat] = curDf.mean(axis=1)
+
+
+
 Df_new.to_csv(CSV_SAVE,index=False)
+
+
