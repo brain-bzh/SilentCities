@@ -16,7 +16,6 @@ run.sh
 *.nii.gz
 *.wav
 *.WAV
-*.csv
 *.zip
 *.jpg
 # Distribution / packaging
