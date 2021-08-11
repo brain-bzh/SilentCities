@@ -1011,6 +1011,7 @@ def bioacousticsIndex (Sxx, fn, frange=(2000, 15000), R_compatible = False):
         # better to average the PSD for energy conservation
         PSDxx_norm = (Sxx/max(Sxx))**2
         meanPSDxx_norm = mean(PSDxx_norm, axis=1)
+        meanPSDxx_norm = meanPSDxx_norm[indf,]-min(meanPSDxx_norm[indf,])
 
         # Compute the area
         # take the sqrt in order to go back to Sxx

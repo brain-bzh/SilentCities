@@ -135,7 +135,7 @@ def compute_ecoacoustics(wavforme, sr, Fmin, Fmax, refdB):
 
     wavforme = butter_bandpass_filter(wavforme, Fmin, Fmax, fs=sr)
     dB_band, freq = OctaveBand.octavefilter(wavforme, fs=sr, fraction=1, order=4, limits=[100, 20000], show=0)
-
+    # dB_band = [0]*8
     Sxx, freqs = compute_spectrogram(wavforme, sr)
 
     Sxx_dB = 10 * np.log10(Sxx)
@@ -146,21 +146,21 @@ def compute_ecoacoustics(wavforme, sr, Fmin, Fmax, refdB):
     # wide : 2000 - 20000 : narrow : 5000 : 15000
     min_anthro_bin = np.argmin([abs(e - 5000) for e in freqs])  # min freq of anthrophony in samples (or bin) (closest bin)
     max_anthro_bin = np.argmin([abs(e - 15000) for e in freqs])  # max freq of anthrophony in samples (or bin)
-    aci_W, _ = compute_ACI(Sxx[:, min_anthro_bin:max_anthro_bin], freqs, 1, sr) # Filtrage 2000 : 20000 (biophony)
-    ndsi_W = compute_NDSI(wavforme, sr, windowLength=1024, anthrophony=[1000, 5000], biophony=[5000, 15000])
-    bi_W = bioacousticsIndex(Sxx, freqs, frange=(5000, 15000), R_compatible=False)
+    aci_N, _ = compute_ACI(Sxx[min_anthro_bin:max_anthro_bin,:], freqs[min_anthro_bin:max_anthro_bin], 100, sr) # Filtrage 2000 : 20000 (biophony)
+    ndsi_N = compute_NDSI(wavforme, sr, windowLength=1024, anthrophony=[1000, 5000], biophony=[5000, 15000])
+    bi_N = bioacousticsIndex(Sxx, freqs, frange=(5000, 15000), R_compatible=False)
 
     min_anthro_bin = np.argmin([abs(e - 2000) for e in freqs])  # min freq of anthrophony in samples (or bin) (closest bin)
     max_anthro_bin = np.argmin([abs(e - 20000) for e in freqs])  # max freq of anthrophony in samples (or bin)
-    aci_N, _ = compute_ACI(Sxx[:, min_anthro_bin:max_anthro_bin], freqs, 1, sr)  # Filtrage 2000 : 20000 (biophony)
-    ndsi_N = compute_NDSI(wavforme, sr, windowLength=1024, anthrophony=[1000, 2000], biophony=[2000, 20000])
-    bi_N = bioacousticsIndex(Sxx, freqs, frange=(2000, 20000), R_compatible=False)
+    aci_W, _ = compute_ACI(Sxx[min_anthro_bin:max_anthro_bin, :], freqs, 100, sr)  # Filtrage 2000 : 20000 (biophony)
+    ndsi_W = compute_NDSI(wavforme, sr, windowLength=1024, anthrophony=[1000, 2000], biophony=[2000, 20000])
+    bi_W = bioacousticsIndex(Sxx, freqs, frange=(2000, 20000), R_compatible=False)
 
     # wide 1000 - 20000 narrow 5000 - 15000
 
 
     EAS_N, _, ECV_N, EPS_N, _, _ = spectral_entropy(Sxx, freqs, frange=(5000, 15000))
-    EAS_W, _, ECV_W, EPS_W, _, _ = spectral_entropy(Sxx, freqs, frange=(1000, 20000))
+    EAS_W, _, ECV_W, EPS_W, _, _ = spectral_entropy(Sxx, freqs, frange=(2000, 20000))
 
 
     ### specific code to calculate ACT and EVN with many ref Db offset
@@ -185,11 +185,11 @@ import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script to test ecoacoustic indices parameters')
 
-    parser.add_argument('--site', default=None, type=int, help='Which site to process')
+    parser.add_argument('--site', default=1, type=int, help='Which site to process')
     parser.add_argument('--nfiles', default=1000, type=int,
                         help='How many files per site (will take the first nfiles files)')
     parser.add_argument('--data_path', default='fortesteco', type=str, help='Path to save meta data')
-    parser.add_argument('--save_path', default='/Users/nicolas/Documents/SilentCities/SilentCities/ecoacoustique/NEW', type=str,
+    parser.add_argument('--save_path', default='/Users/nicolas/Documents/SilentCities/SilentCities/ecoacoustique/NEW3', type=str,
                         help='Path to save meta data')
     parser.add_argument('--reject_core', default=1,
                         type=int,
@@ -200,7 +200,7 @@ if __name__ == '__main__':
     NUM_CORE = multiprocessing.cpu_count() - args.reject_core
     print(f'core numbers {NUM_CORE}')
     site = args.site
-    # for site in tqdm([4, 11, 25, 36, 38, 52, 61, 62, 77, 87, 115, 120, 121, 132, 153, 158, 159, 190, 229, 234, 276, 292, 346, 371, 388]):
+    # for site in tqdm([4, 11, 25, 36, 38, 48, 52, 61, 62, 77, 87, 115, 120, 121, 132, 153, 158, 159, 190, 229, 234, 276, 292, 346, 371, 388]):
     site = f"{site:04d}"
     nfiles = args.nfiles
     if nfiles == 0:
@@ -266,7 +266,7 @@ if __name__ == '__main__':
         df_site['datetime'][idx] = datetime.datetime.strptime(k, '%Y%m%d_%H%M%S')
 
     print(df_site)
-    
+
     indic = ['dB', 'ndsi', 'aci', 'nbpeaks', 'BI', 'EVN', 'ACT', 'EAS', 'ECV', 'EPS']
 
     fig = make_subplots(rows=5, cols=2,print_grid=True, subplot_titles=indic,shared_xaxes='all')
