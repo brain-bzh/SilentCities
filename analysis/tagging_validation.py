@@ -21,7 +21,7 @@ def linear(Df):
     return Df
 
 # Load label
-with open('../audioset_tagging_cnn/class_labels_indices.csv', 'r') as f:
+with open('audioset_tagging_cnn/class_labels_indices.csv', 'r') as f:
     reader = csv.reader(f, delimiter=',')
     lines = list(reader)
 
