@@ -248,7 +248,7 @@ if __name__ == '__main__':
                 'POWERB_126':[], 'POWERB_251':[], 'POWERB_501':[], 'POWERB_1k':[], 'POWERB_2k':[], 'POWERB_4k':[], 'POWERB_8k':[], 'POWERB_16k':[]}
 
 
-    for batch_idx, info in enumerate(set_):
+    for batch_idx, info in enumerate(tqdm(set_)):
         for idx, date_ in enumerate(info['date']):
             df_site['datetime'].append(str(date_))
             df_site['name'].append(str(info['name'][idx]))
