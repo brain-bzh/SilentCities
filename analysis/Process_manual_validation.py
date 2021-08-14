@@ -27,7 +27,7 @@ for cur_idx in lst_indic:
 add_col = True
 for site in list_site:
 
-    Df = pd.read_csv(f'/Users/nicolas/Documents/SilentCities/SilentCities/ecoacoustique/NEW2/site_{site:04d}.csv')
+    Df = pd.read_csv(f'/Users/nicolas/Documents/SilentCities/SilentCities/ecoacoustique/NEW3/site_{site:04d}.csv')
     Tagg = pd.read_csv(f'/Users/nicolas/Documents/SilentCities/SilentCities/ecoacoustique/NEW2/tagging_site_{site:04d}.csv')
     if add_col:
         lst_tag = Tagg.columns[2:]
@@ -62,3 +62,29 @@ for site in list_site:
 print(manual_validation)        
 manual_validation.to_excel('Manual_validation_indic.xlsx')
 manual_validation.to_csv('Manual_validation_indic.csv')
+
+
+# for site in list_site:
+
+#     Tagg = pd.read_csv(f'/Users/nicolas/Documents/SilentCities/SilentCities/ecoacoustique/NEW2/tagging_site_{site:04d}.csv')
+#     Tagg = Tagg.sort_values('name').reset_index(drop=True)
+    
+#     list_name = []
+#     curr_name = 0
+#     for idx, filemane in enumerate(Tagg['name']):
+#         if curr_name != filemane:
+#             list_site.append(filemane)
+
+#         curr_name = filemane
+
+#     file_save_name = f'/Users/nicolas/Documents/SilentCities/SilentCities/ecoacoustique/NEW2/tagging_site_av_{site:04d}.csv'
+
+#     col = Tagg.columns
+#     out = pd.DataFrame(columns=col)
+
+#     for idx, file in enumerate(list_site):
+#         for keys in col:
+
+
+
+
