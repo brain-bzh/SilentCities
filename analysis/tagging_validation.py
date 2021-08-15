@@ -135,8 +135,4 @@ for cursubcat in macro_cat.keys():
 
     Df_new[cursubcat] = curDf.max(axis=1)
 
-
-
-Df_new.to_csv(CSV_SAVE,index=False)
-
-
+Df_new.sort_values(by=['datetime','start']).to_csv(CSV_SAVE,index=False)
