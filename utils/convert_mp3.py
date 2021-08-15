@@ -41,7 +41,7 @@ for root, dirs, files in os.walk(path_audio_folder, topdown=False):
             
             nchunks = len(Dffile)
             if nchunks == 0:
-                raise(f"File {curfile} not found !!!")
+                print(f"File {curfile} not found !!!")
             ## How many chunks are they ? 
             #print(f"Found {nchunks} chunks for file {curfile}")
 
@@ -62,7 +62,8 @@ for root, dirs, files in os.walk(path_audio_folder, topdown=False):
                            format="mp3",
                            bitrate="128k")
                 else:
-                    print(f"File {mp3_file} already exists, skipping...")                                
+                    #print(f"File {mp3_file} already exists, skipping...")
+                    continue                       
                 
             
 
