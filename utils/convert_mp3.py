@@ -30,7 +30,6 @@ print(f"Loading file {meta_filename}")
 meta_file = pd.read_csv(meta_filename)
 meta_file = meta_file.reset_index(drop=True)
 
-print(meta_file.columns)
 
 for root, dirs, files in os.walk(path_audio_folder, topdown=False):
     for name in files:
