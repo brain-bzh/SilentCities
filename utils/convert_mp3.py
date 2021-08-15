@@ -44,7 +44,7 @@ for root, dirs, files in os.walk(path_audio_folder, topdown=False):
             if nchunks == 0:
                 raise(f"File {curfile} not found !!!")
             ## How many chunks are they ? 
-            print(f"Found {nchunks} chunks for file {curfile}")
+            #print(f"Found {nchunks} chunks for file {curfile}")
 
             ## Looping over chunks
             for curstart in Dffile['start']:
@@ -57,7 +57,7 @@ for root, dirs, files in os.walk(path_audio_folder, topdown=False):
                 mp3_file = os.path.join(outputfolder,f"{os.path.splitext(name)[0]}_{curstart}.mp3")
 
                 if not(os.path.isfile(mp3_file)):
-                    print(f"Converting {mp3_file}...")
+                    #print(f"Converting {mp3_file}...")
 
                     file_handle = wav_audio.export(mp3_file,
                            format="mp3",
