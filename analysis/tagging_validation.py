@@ -98,7 +98,7 @@ fewlabels = newlabellist
 Df_new = pd.DataFrame()
 Df_new['name'] = Df['name']
 Df_new['start'] = Df['start']
-Df_new['start'] = Df['datetime']
+Df_new['datetime'] = Df['datetime']
 
 #for i,curlab in enumerate(fewlabels):
 #    Df_new[curlab] = probas[:,i]
