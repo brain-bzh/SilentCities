@@ -56,9 +56,15 @@ if os.path.exists(audio_process_name):
     df_site = utils.utils.load_obj(audio_process_name)
 
 else:
-    df_site = {'name':[],'start':[], 'datetime': [], 'dB':[], 'ndsi': [], 'aci': [], 'nbpeaks': [] , 'BI' : [], 'EVN' : [], 'ACT' : [], 'EAS':[], 'ECV' : [], 'EPS' : [],
-    'dB_filt': [], 'ndsi_filt': [], 'aci_filt': [], 'nbpeaks_filt': [] , 'BI_filt' : [], 'EVN_filt' : [], 'ACT_filt' : [], 'EAS_filt': [], 'ECV_filt' : [], 'EPS_filt' : [],
-                                'clipwise_output':[], 'sorted_indexes' : [] ,'embedding' : []}
+    df_site = {'name':[],'start':[], 'datetime': [], 'dB': [], 'ndsi_N': [], 'aci_N': [],
+                    'BI_N': [], 'EAS_N': [],
+                    'ECV_N': [], 'EPS_N': [] ,'ndsi_W': [], 'aci_W': [],
+                    'BI_W': [], 'EAS_W': [],
+                    'ECV_W': [], 'EPS_W': [], 'ACT':[],
+                    'POWERB_126':[], 'POWERB_251':[], 'POWERB_501':[], 
+                    'POWERB_1k':[], 'POWERB_2k':[], 'POWERB_4k':[], 
+                    'POWERB_8k':[], 'POWERB_16k':[],
+                    'clipwise_output':[], 'sorted_indexes' : [] ,'embedding' : []}
 site_set = dataset.get_dataloader_site(
     args.site, args.folder, meta_site, df_site,args.metadata_folder,database = DATABASE, batch_size=args.batch_size)
 print('audio processing')

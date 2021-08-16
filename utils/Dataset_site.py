@@ -21,6 +21,7 @@ from utils.ecoacoustics import compute_NDSI, compute_NB_peaks, compute_ACI, comp
 from utils.alpha_indices import acoustic_events, acoustic_activity, spectral_entropy, bioacousticsIndex
 # from audio_processing import DATABASE
 from scipy.signal import butter, filtfilt
+from utils import OctaveBand
 
 
 NUM_CORE = multiprocessing.cpu_count() - 4
@@ -54,51 +55,53 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
     return y
 
 
-def compute_ecoacoustics(wavforme, sr, ref_mindb):
-    #Full band
+
+def compute_ecoacoustics(wavforme, sr, Fmin, Fmax, refdB):
+
+
+    wavforme = butter_bandpass_filter(wavforme, Fmin, Fmax, fs=sr)
+    dB_band, _ = OctaveBand.octavefilter(wavforme, fs=sr, fraction=1, order=4, limits=[100, 20000], show=0)
+    # dB_band = [0]*8
     Sxx, freqs = compute_spectrogram(wavforme, sr)
-    Sxx_dB = 10*np.log10(Sxx)
-    N = len(wavforme)
-    dB = 20*np.log10(np.std(wavforme))
-    
-    nbpeaks = compute_NB_peaks(Sxx, freqs, sr, slopes=(1/75,1/75))
-    aci, _ = compute_ACI(Sxx, freqs, N, sr)
-    ndsi = compute_NDSI(wavforme,sr)
-    bi = bioacousticsIndex(Sxx, freqs)
-    _, _, EVN,_  = acoustic_events(Sxx_dB, 1/(freqs[2]-freqs[1]), dB_threshold = ref_mindb[0]+6)
-    
-    _, _, ACT = acoustic_activity(Sxx_dB, dB_threshold = ref_mindb[0]+6)
-    EAS,_,ECV,EPS,_,_ = spectral_entropy(Sxx, freqs)
 
-    # filt
-    wavforme = butter_bandpass_filter(wavforme, 5000, 20000, fs = sr, order=9)
+    # Sxx_dB = 10 * np.log10(Sxx)
+    # N = len(wavforme)
+    dB = 20 * np.log10(np.std(wavforme))
 
-    Sxx, freqs = compute_spectrogram(wavforme, sr)
-    Sxx_dB = 10*np.log10(Sxx)
-    N = len(wavforme)
-    dB_filt = 20*np.log10(np.std(wavforme))
-    nbpeaks_filt = compute_NB_peaks(Sxx, freqs, sr, slopes=(1/75,1/75))
-    aci_filt, _ = compute_ACI(Sxx, freqs, N, sr)
-    ndsi_filt = compute_NDSI(wavforme,sr)
-    bi_filt = bioacousticsIndex(Sxx, freqs)
-    _, _, EVN_filt,_  = acoustic_events(Sxx_dB, 1/(freqs[2]-freqs[1]), dB_threshold=ref_mindb[1]+6)
-    
-    _, _, ACT_filt = acoustic_activity(Sxx_dB, dB_threshold = ref_mindb[1]+6)
-    EAS_filt,_,ECV_filt,EPS_filt,_,_ = spectral_entropy(Sxx, freqs)
+    # nbpeaks = compute_NB_peaks(Sxx, freqs, sr, freqband=200, normalization=True, slopes=(1 / 75, 1 / 75))
+    # wide : 2000 - 20000 : narrow : 5000 : 15000
+    min_anthro_bin = np.argmin([abs(e - 5000) for e in freqs])  # min freq of anthrophony in samples (or bin) (closest bin)
+    max_anthro_bin = np.argmin([abs(e - 15000) for e in freqs])  # max freq of anthrophony in samples (or bin)
+    aci_N, _ = compute_ACI(Sxx[min_anthro_bin:max_anthro_bin,:], freqs[min_anthro_bin:max_anthro_bin], 100, sr) 
+    ndsi_N = compute_NDSI(wavforme, sr, windowLength=1024, anthrophony=[1000, 5000], biophony=[5000, 15000])
+    bi_N = bioacousticsIndex(Sxx, freqs, frange=(5000, 15000), R_compatible=False)
 
-    indicateur = {'dB' : dB, 'ndsi': ndsi, 'aci': aci, 
-                    'nbpeaks': nbpeaks, 'BI' : bi, 'EVN' : sum(EVN), 
-                    'ACT' : sum(ACT), 'EAS' : EAS, 
-                    'ECV' : ECV, 'EPS' : EPS,'dB_filt' : dB_filt, 'ndsi_filt': ndsi_filt, 'aci_filt': aci_filt, 
-                    'nbpeaks_filt': nbpeaks_filt, 'BI_filt' : bi_filt, 'EVN_filt' : sum(EVN_filt), 
-                    'ACT_filt' : sum(ACT_filt), 'EAS_filt' : EAS_filt, 
-                    'ECV_filt' : ECV_filt, 'EPS_filt' : EPS_filt}
-    
+    min_anthro_bin = np.argmin([abs(e - 2000) for e in freqs])  # min freq of anthrophony in samples (or bin) (closest bin)
+    max_anthro_bin = np.argmin([abs(e - 20000) for e in freqs])  # max freq of anthrophony in samples (or bin)
+    aci_W, _ = compute_ACI(Sxx[min_anthro_bin:max_anthro_bin, :], freqs, 100, sr)  
+    ndsi_W = compute_NDSI(wavforme, sr, windowLength=1024, anthrophony=[1000, 2000], biophony=[2000, 20000])
+    bi_W = bioacousticsIndex(Sxx, freqs, frange=(2000, 20000), R_compatible=False)
+
+    # wide 1000 - 20000 narrow 5000 - 15000
+
+
+    EAS_N, _, ECV_N, EPS_N, _, _ = spectral_entropy(Sxx, freqs, frange=(5000, 15000))
+    EAS_W, _, ECV_W, EPS_W, _, _ = spectral_entropy(Sxx, freqs, frange=(2000, 20000))
+
+
+    ### specific code to calculate ACT and EVN with many ref Db offset
+
+    _, ACT, _ = acoustic_activity(10*np.log10(np.abs(wavforme)**2), dB_threshold=refdB[1] + 12, axis=-1)
+    ACT = np.sum(np.asarray(ACT))/sr
+
+    indicateur = {'dB': dB, 'ndsi_N': ndsi_N, 'aci_N': aci_N,
+                  'BI_N': bi_N, 'EAS_N': EAS_N,
+                  'ECV_N': ECV_N, 'EPS_N': EPS_N,'ndsi_W': ndsi_W, 'aci_W': aci_W,
+                  'BI_W': bi_W, 'EAS_W': EAS_W,
+                  'ECV_W': ECV_W, 'EPS_W': EPS_W, 'ACT':ACT,
+                  'POWERB_126':dB_band[0], 'POWERB_251':dB_band[1], 'POWERB_501':dB_band[2], 'POWERB_1k':dB_band[3], 'POWERB_2k':dB_band[4], 'POWERB_4k':dB_band[5], 'POWERB_8k':dB_band[6], 'POWERB_16k':dB_band[7]}
 
     return indicateur
-
-
-
 
 
 class Silent_dataset(Dataset):
@@ -115,7 +118,7 @@ class Silent_dataset(Dataset):
         wav, sr = librosa.load(filename, sr=None, mono=True,
                               offset=self.meta['start'][idx], duration=len_audio_s)
         
-        ecoac = compute_ecoacoustics(wav, sr, ref_mindb=self.ref_dB)
+        ecoac = compute_ecoacoustics(wav, sr, Fmin = 100, Fmax=20000, ref_mindb=self.ref_dB)
 
         if sr != self.sr:
             wav = resample(wav, int(len_audio_s*self.sr))
