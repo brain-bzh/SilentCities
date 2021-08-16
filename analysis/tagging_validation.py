@@ -98,7 +98,7 @@ fewlabels = newlabellist
 Df_new = pd.DataFrame()
 Df_new['name'] = Df['name']
 Df_new['start'] = Df['start']
-Df_new['start'] = Df['datetime']
+Df_new['datetime'] = Df['datetime']
 
 #for i,curlab in enumerate(fewlabels):
 #    Df_new[curlab] = probas[:,i]
@@ -135,8 +135,4 @@ for cursubcat in macro_cat.keys():
 
     Df_new[cursubcat] = curDf.max(axis=1)
 
-
-
-Df_new.to_csv(CSV_SAVE,index=False)
-
-
+Df_new.sort_values(by=['datetime','start']).to_csv(CSV_SAVE,index=False)
