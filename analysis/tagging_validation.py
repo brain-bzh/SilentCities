@@ -63,7 +63,7 @@ def subset_probas(Df,search_labels):
             ind_list.append(int(np.argwhere([c==curlabel for c in labels])))
             newlabellist.append(curlabel)
         except:
-            print(f"Label {curlabel} not present in PANN training")
+            #print(f"Label {curlabel} not present in PANN training")
             notfound.append(curlabel)
 
     return allprobas[:,ind_list],newlabellist,notfound   
