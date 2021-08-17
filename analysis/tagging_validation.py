@@ -74,8 +74,8 @@ def load_obj_tag(name ):
     with open(name , 'rb') as f:
         return pickle.load(f)
 
-def tagging_validate(pklfile,fewlabels=fewlabels,dict_allcats=dict_allcats):
-    Df = load_obj_tag(args.input)
+def tagging_validate(Df,fewlabels=fewlabels,dict_allcats=dict_allcats):
+    
     probas,newlabellist,notfound = subset_probas(Df,fewlabels)
 
     fewlabels = newlabellist
@@ -132,7 +132,7 @@ if __name__ == '__main__':
     site= str.split(args.input,sep='_')[-1].split(sep='.')[0]
     savepath = args.save_path
     CSV_SAVE = os.path.join(savepath,f'tagging_site_{site}.csv')
-
-    Df_new = tagging_validate(args.input)
+    Df = load_obj_tag(args.input)
+    Df_new = tagging_validate(Df)
 
     Df_new.sort_values(by=['datetime','start']).to_csv(CSV_SAVE,index=False)
