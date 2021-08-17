@@ -150,7 +150,7 @@ def Update_heatmap(clickData):
     current_partID = clickData['points'][0]['customdata'][0]
     idx =  clickData['points'][0]['pointNumber']
 
-    figindic, data = pf.get_heatmaps(current_partID)
+    figindic, data = pf.get_heatmaps(current_partID, path=PATH_MP3)
 
 
     text = [f"Site: {database['partID'][idx]}", html.Br(),

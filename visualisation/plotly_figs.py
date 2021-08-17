@@ -28,7 +28,7 @@ def get_map_fig(database):
                         ))
     return fig
 
-def get_heatmaps(site, path = '/Users/nicolas/Documents/SilentCities/SilentCities/ecoacoustique/NEW3'):
+def get_heatmaps(site, path):
     global data
 
     macro_cat = {'geophony':['Wind', 'Rain', 'River', 'Wave', 'Thunder'],
@@ -64,7 +64,7 @@ def get_heatmaps(site, path = '/Users/nicolas/Documents/SilentCities/SilentCitie
 
     return fig, data
 
-def get_sample_fig(site, file, path = '/Users/nicolas/Documents/SilentCities/SilentCities/fortesteco'):
+def get_sample_fig(site, file, path):
     path_audio = os.path.join(path, f'{site:04d}', file)
     audio, sr = librosa.load(path_audio, sr = 44100)
 
