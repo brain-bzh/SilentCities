@@ -7,6 +7,7 @@ from tqdm import tqdm
 from audioset_tagging_cnn.inference import audio_tagging
 import utils.Dataset_site as dataset
 import utils.utils
+from analysis.tagging_validation import tagging_validate
 
 parser = argparse.ArgumentParser(
     description='Silent City Audio Tagging with pretrained LeeNet22 on Audioset')
@@ -51,6 +52,7 @@ print('preprocessing dataset')
 
 
 audio_process_name = os.path.join(args.metadata_folder, '{}_process.pkl'.format(args.site))
+csvfile = os.path.join(args.metadata_folder, 'results_{}.csv'.format(args.site))
 
 if os.path.exists(audio_process_name):
     df_site = utils.utils.load_obj(audio_process_name)
@@ -88,6 +90,23 @@ for batch_idx, (inputs, info) in tqdm(enumerate(site_set)):
     
     if batch_idx%100 == 0:
         utils.utils.save_obj(df_site, audio_process_name)
+
+## Saving the pkl with all the processed data : Tagging probas, embeddings, and ecoacoustic indices
 utils.utils.save_obj(df_site, audio_process_name)
-    
-# print(df_site)20424
+
+## Generating the Dataframe with the subset of tagging categories as well as Geophony, Anthropophony and Biophony
+
+Df_tagging = tagging_validate(df_site)
+
+## Dataframe with only ecoacoustic indices and important metadata 
+Df_eco = pd.DataFrame()
+Df_eco['name'] = df_site['name']
+Df_eco['start'] = df_site['start']
+Df_eco['datetime'] = df_site['datetime']
+for key in info['ecoac'].keys():
+    Df_eco[key] = df_site[key]
+
+## Fusing with the dataframe containing only the ecoacoustic indices 
+
+Df_final = pd.merge(Df_tagging,Df_eco,on=[['name','start','datetime']])
+Df_final.sort_values(by=['datetime','start']).to_csv(csvfile,index=False)
