@@ -91,7 +91,7 @@ for batch_idx, (inputs, info) in tqdm(enumerate(site_set)):
     if batch_idx%100 == 0:
         utils.utils.save_obj(df_site, audio_process_name)
 
-## Saving the pkl with all the processed data : Tagging probas, embeddings, and ecoacoustic indices
+## Saving the pkl with all the processed data : Tagging probas, embeddings, and ecoacoustic indices (named xxxx_process.pkl)
 utils.utils.save_obj(df_site, audio_process_name)
 
 ## Generating the Dataframe with the subset of tagging categories as well as Geophony, Anthropophony and Biophony
