@@ -123,7 +123,7 @@ def tagging_validate(pklfile,fewlabels=fewlabels,dict_allcats=dict_allcats):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Script to test ecoacoustic indices parameters')
+    parser = argparse.ArgumentParser(description='Script to regroup tagging output into a csv file')
     parser.add_argument('--input', default=None, type=str, help='Path to pkl file')
     parser.add_argument('--save_path', default='/bigdisk2/meta_silentcities/tests_eco', type=str, help='Path to save output csv and pkl')
 
