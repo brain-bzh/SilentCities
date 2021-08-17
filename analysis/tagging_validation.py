@@ -74,65 +74,65 @@ def load_obj_tag(name ):
     with open(name , 'rb') as f:
         return pickle.load(f)
 
+def tagging_validate(pklfile,fewlabels=fewlabels,dict_allcats=dict_allcats):
+    Df = load_obj_tag(args.input)
+    probas,newlabellist,notfound = subset_probas(Df,fewlabels)
 
-parser = argparse.ArgumentParser(description='Script to test ecoacoustic indices parameters')
+    fewlabels = newlabellist
 
-parser.add_argument('--input', default=None, type=str, help='Path to pkl file')
-parser.add_argument('--save_path', default='/bigdisk2/meta_silentcities/tests_eco', type=str, help='Path to save output csv and pkl')
+    ### Lets first generate a csv with all the probabilities, no grouping
+    # 
+    # # create Dataframe from Dict
 
-args = parser.parse_args()
+    Df_new = pd.DataFrame()
+    Df_new['name'] = Df['name']
+    Df_new['start'] = Df['start']
+    Df_new['datetime'] = Df['datetime']
 
-site= str.split(args.input,sep='_')[-1].split(sep='.')[0]
-savepath = args.save_path
-CSV_SAVE = os.path.join(savepath,f'tagging_site_{site}.csv')
+    ### Now let s generate another csv to have the matching with categories of the manual identification protocol
+    ### to do that, we take the maximum probability in the subcategory identified by the dictionnary 
+    ### We parse using the dictionnary dict_allcats
 
-Df = load_obj_tag(args.input)
-probas,newlabellist,notfound = subset_probas(Df,fewlabels)
+    for cursubcat in dict_allcats.keys():
+        curlabels = dict_allcats[cursubcat]
 
-fewlabels = newlabellist
+        probas_sub,newlabellist_sub,_ = subset_probas(Df,curlabels)
 
-### Lets first generate a csv with all the probabilities, no grouping
-# 
-# # create Dataframe from Dict
+        probas_max = np.max(probas_sub,axis=1)
 
-Df_new = pd.DataFrame()
-Df_new['name'] = Df['name']
-Df_new['start'] = Df['start']
-Df_new['datetime'] = Df['datetime']
+        cursublabel = 'tag_' + cursubcat
 
-#for i,curlab in enumerate(fewlabels):
-#    Df_new[curlab] = probas[:,i]
-### Saving 
+        Df_new[cursublabel] = probas_max
 
+    ### And Finally let's do an estimation of BioPhony, Antropophony and Geophony level using audio tagging results 
+    ### For that, we group the categories accordingly : 
 
-### Now let s generate another csv to have the matching with categories of the manual identification protocol
-### to do that, we take the maximum probability in the subcategory identified by the dictionnary 
-### We parse using the dictionnary dict_allcats
-
-for cursubcat in dict_allcats.keys():
-    curlabels = dict_allcats[cursubcat]
-
-    probas_sub,newlabellist_sub,_ = subset_probas(Df,curlabels)
-
-    probas_max = np.max(probas_sub,axis=1)
-
-    cursublabel = 'tag_' + cursubcat
-
-    Df_new[cursublabel] = probas_max
-
-### And Finally let's do an estimation of BioPhony, Antropophony and Geophony level using audio tagging results 
-### For that, we group the categories accordingly : 
-
-macro_cat = {'geophony':['Wind', 'Rain', 'River', 'Wave', 'Thunder'],'biophony': ['Bird', 'Amphibian', 'Insect', 'Mammal', 'Reptile'], 'anthropophony': ['Walking', 'Cycling', 'Beep', 'Car', 'Car honk', 'Motorbike', 'Plane', 'Helicoptere', 'Boat', 'Others_motors', 'Shoot', 'Bell', 'Talking', 'Music', 'Dog bark', 'Kitchen sounds', 'Rolling shutter']}
+    macro_cat = {'geophony':['Wind', 'Rain', 'River', 'Wave', 'Thunder'],'biophony': ['Bird', 'Amphibian', 'Insect', 'Mammal', 'Reptile'], 'anthropophony': ['Walking', 'Cycling', 'Beep', 'Car', 'Car honk', 'Motorbike', 'Plane', 'Helicoptere', 'Boat', 'Others_motors', 'Shoot', 'Bell', 'Talking', 'Music', 'Dog bark', 'Kitchen sounds', 'Rolling shutter']}
 
 
-### and now we will calculate the average probability in each of the three macro categories 
+    ### and now we will calculate the average probability in each of the three macro categories 
 
-for cursubcat in macro_cat.keys():
-    curlabels = ['tag_' + i for i in macro_cat[cursubcat]]
+    for cursubcat in macro_cat.keys():
+        curlabels = ['tag_' + i for i in macro_cat[cursubcat]]
 
-    curDf = Df_new[curlabels]
+        curDf = Df_new[curlabels]
 
-    Df_new[cursubcat] = curDf.max(axis=1)
+        Df_new[cursubcat] = curDf.max(axis=1)
 
-Df_new.sort_values(by=['datetime','start']).to_csv(CSV_SAVE,index=False)
+    return Df_new
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Script to test ecoacoustic indices parameters')
+    parser.add_argument('--input', default=None, type=str, help='Path to pkl file')
+    parser.add_argument('--save_path', default='/bigdisk2/meta_silentcities/tests_eco', type=str, help='Path to save output csv and pkl')
+
+    args = parser.parse_args()
+
+    site= str.split(args.input,sep='_')[-1].split(sep='.')[0]
+    savepath = args.save_path
+    CSV_SAVE = os.path.join(savepath,f'tagging_site_{site}.csv')
+
+    Df_new = tagging_validate(args.input)
+
+    Df_new.sort_values(by=['datetime','start']).to_csv(CSV_SAVE,index=False)
