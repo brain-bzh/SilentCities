@@ -118,7 +118,7 @@ class Silent_dataset(Dataset):
         wav, sr = librosa.load(filename, sr=None, mono=True,
                               offset=self.meta['start'][idx], duration=len_audio_s)
         
-        ecoac = compute_ecoacoustics(wav, sr, Fmin = 100, Fmax=20000, ref_mindb=self.ref_dB)
+        ecoac = compute_ecoacoustics(wav, sr, Fmin = 100, Fmax=20000, refdB=self.ref_dB)
 
         if sr != self.sr:
             wav = resample(wav, int(len_audio_s*self.sr))
