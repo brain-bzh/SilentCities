@@ -55,6 +55,7 @@ audio_process_name = os.path.join(args.metadata_folder, '{}_process.pkl'.format(
 csvfile = os.path.join(args.metadata_folder, 'results_{}.csv'.format(args.site))
 
 if os.path.exists(audio_process_name):
+    print(f"Data was previously processed, file : {audio_process_name}")
     df_site = utils.utils.load_obj(audio_process_name)
 
 else:
@@ -71,7 +72,7 @@ site_set = dataset.get_dataloader_site(
     args.site, args.folder, meta_site, df_site,args.metadata_folder,database = DATABASE, batch_size=args.batch_size)
 print('audio processing')
 
-for batch_idx, (inputs, info) in tqdm(enumerate(site_set)):
+for batch_idx, (inputs, info) in enumerate(tqdm(site_set)):
 
     with torch.no_grad():
 

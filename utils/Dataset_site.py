@@ -145,7 +145,7 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, dat
             for name in files:
                 if name[-3:].casefold() == 'wav' and name[:2] != '._':
                     if name == file_refdB:
-                        print('coucou')
+                        #print('coucou')
                         file_refdB = os.path.join(root,name)
         
     else:
@@ -160,7 +160,7 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, dat
         
         filelist_base = [os.path.basename(file_) for file_ in filelist]
 
-        for idx, wavfile in tqdm(enumerate(meta_site['filename'])):
+        for idx, wavfile in enumerate(tqdm(meta_site['filename'])):
 
             len_file = meta_site['length'][idx]
             sr_in = meta_site['sr'][idx]
