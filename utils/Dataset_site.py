@@ -13,7 +13,7 @@ import pandas as pd
 
 import tempfile
 defult_tmp_dir = tempfile._get_default_tempdir()
-print(defult_tmp_dir)
+
 import torch
 
 from torch.utils.data import Dataset
@@ -116,6 +116,8 @@ class Silent_dataset(Dataset):
         self.sr = sr
         self.meta = meta_dataloader
         self.to_mp3 = to_mp3 ### this must be the output site folder
+        if not(to_mp3 is None):
+            print(f"Temp folder for wav files for mp3 conversion : {defult_tmp_dir}")
 
     def __getitem__(self, idx):
         filename = self.meta['filename'][idx]
@@ -216,9 +218,6 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, dat
         site_set, batch_size=batch_size, shuffle=False, num_workers=NUM_CORE-1)
 
     return site_set
-
-
-
 
 if __name__ == '__main__':
 
