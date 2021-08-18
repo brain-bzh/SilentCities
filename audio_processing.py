@@ -18,6 +18,8 @@ parser.add_argument('--metadata_folder', default=None,
 parser.add_argument('--site', default=None, type=str, help='site to process')
 parser.add_argument('--folder', default=None, type=str,
                     help='Path to folder with wavefiles, will walk through subfolders')
+parser.add_argument('--tomp3', default=None, type=str,
+                    help='Path to folder for mp3 conversion, (Default : no conversion). Will create a subfolder with site name')
 parser.add_argument('--database', default=None, type=str,
                     help='Path to metadata (given by metadata_site.py)')
 
@@ -32,6 +34,13 @@ if args.metadata_folder is None:
     raise(AttributeError("Must provide metadata folder"))
 if args.site is None:
     raise(AttributeError("Must provide site"))
+
+mp3folder = args.tomp3
+if not(mp3folder is None):
+    print("Will convert to mp3...")
+    mp3folder = os.path.join(args.tomp3,args.site)
+    print(f"Creating folder {mp3folder}")
+    os.makedirs(mp3folder,exist_ok=True)
 
 checkpoint_path = 'ResNet22_mAP=0.430.pth'
 
@@ -69,7 +78,7 @@ else:
                     'POWERB_8k':[], 'POWERB_16k':[],
                     'clipwise_output':[], 'sorted_indexes' : [] ,'embedding' : []}
 site_set = dataset.get_dataloader_site(
-    args.site, args.folder, meta_site, df_site,args.metadata_folder,database = DATABASE, batch_size=args.batch_size)
+    args.site, args.folder, meta_site, df_site,args.metadata_folder,database = DATABASE, batch_size=args.batch_size,mp3folder=mp3folder)
 print('audio processing')
 
 for batch_idx, (inputs, info) in enumerate(tqdm(site_set)):

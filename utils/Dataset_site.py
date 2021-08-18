@@ -157,7 +157,7 @@ class Silent_dataset(Dataset):
         return len(self.meta['filename'])
 
 
-def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, database ,sample_rate=32000, batch_size=6):
+def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, database ,sample_rate=32000, batch_size=6,mp3folder = None):
     partIDidx = database[database.partID == int(site_ID)].index[0]
     file_refdB = database['ref_file'][partIDidx]
     if os.path.exists(os.path.join(meta_path, site_ID+'_metaloader.pkl')):
@@ -206,7 +206,7 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, dat
         meta_dataloader.to_pickle(os.path.join(meta_path, site_ID+'_metaloader.pkl'))
     print(meta_dataloader)
 
-    site_set = Silent_dataset(meta_dataloader.reset_index(drop=True), sample_rate, file_refdB)
+    site_set = Silent_dataset(meta_dataloader.reset_index(drop=True), sample_rate, file_refdB,mp3folder)
     site_set = torch.utils.data.DataLoader(
         site_set, batch_size=batch_size, shuffle=False, num_workers=NUM_CORE-1)
 
