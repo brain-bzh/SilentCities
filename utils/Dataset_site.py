@@ -12,7 +12,8 @@ import librosa
 import pandas as pd
 
 import tempfile
-
+defult_tmp_dir = tempfile._get_default_tempdir()
+print(defult_tmp_dir)
 import torch
 
 from torch.utils.data import Dataset
@@ -132,9 +133,9 @@ class Silent_dataset(Dataset):
             #print(mp3_file)
             if not(os.path.isfile(mp3_file)):
                 #print(f"Converting {mp3_file}...")
-                ## Converting current chunk to temporary wav file 
+                ## Converting current chunk to temporary wav file in a temp folder
 
-                temp_name = next(tempfile._get_candidate_names()) + '.wav'
+                temp_name = os.path.join(defult_tmp_dir,next(tempfile._get_candidate_names()) + '.wav')
                 sf.write(temp_name,wav,self.sr)
 
                 ## reading  chunk
