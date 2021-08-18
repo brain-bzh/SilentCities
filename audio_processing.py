@@ -55,7 +55,7 @@ audio_process_name = os.path.join(args.metadata_folder, '{}_process.pkl'.format(
 csvfile = os.path.join(args.metadata_folder, 'results_{}.csv'.format(args.site))
 
 if os.path.exists(audio_process_name):
-    print(f"Data was previously processed, file : {audio_process_name}")
+    print(f"File exists, resuming processing, loading : {audio_process_name}")
     df_site = utils.utils.load_obj(audio_process_name)
 
 else:
@@ -87,7 +87,7 @@ for batch_idx, (inputs, info) in enumerate(tqdm(site_set)):
         df_site['start'].append(float(info['start'][idx]))
         for key in info['ecoac'].keys():
             df_site[key].append(float(info['ecoac'][key].numpy()[idx])) 
-    # print(df_site['start'])
+    
     
     if batch_idx%100 == 0:
         utils.utils.save_obj(df_site, audio_process_name)
@@ -109,5 +109,5 @@ for key in info['ecoac'].keys():
 
 ## Fusing with the dataframe containing only the ecoacoustic indices 
 
-Df_final = pd.merge(Df_tagging,Df_eco,on=[['name','start','datetime']])
+Df_final = pd.merge(Df_tagging,Df_eco,on=['name','start','datetime'])
 Df_final.sort_values(by=['datetime','start']).to_csv(csvfile,index=False)
