@@ -23,6 +23,8 @@ from utils.alpha_indices import acoustic_events, acoustic_activity, spectral_ent
 from scipy.signal import butter, filtfilt
 from utils import OctaveBand
 
+from pydub import AudioSegment
+import soundfile as sf
 
 NUM_CORE = multiprocessing.cpu_count() - 4
 print(f'core numbers {NUM_CORE}')
@@ -105,12 +107,13 @@ def compute_ecoacoustics(wavforme, sr, Fmin, Fmax, refdB):
 
 
 class Silent_dataset(Dataset):
-    def __init__(self, meta_dataloader, sr, file_refdB):
+    def __init__(self, meta_dataloader, sr, file_refdB,to_mp3=None):
         ref, sr_ = librosa.load(file_refdB, sr=None, mono=True)
         ref_filt = butter_bandpass_filter(ref, 5000, 20000, fs = sr_, order=9)
         self.ref_dB = (20*np.log10(np.std(ref)), 20*np.log10(np.std(ref_filt)))                  
         self.sr = sr
         self.meta = meta_dataloader
+        self.to_mp3 = to_mp3 ### this must be the output site folder
 
     def __getitem__(self, idx):
         filename = self.meta['filename'][idx]
@@ -121,6 +124,27 @@ class Silent_dataset(Dataset):
         
         if sr != self.sr:
             wav = resample(wav, int(len_audio_s*self.sr))
+
+        if not(self.to_mp3 is None):
+            ## name of the mp3 file
+            mp3_file = os.path.join(self.to_mp3,f"{os.path.splitext(filename)[0]}_{self.meta['start'][idx]}.mp3")
+
+            if not(os.path.isfile(mp3_file)):
+                #print(f"Converting {mp3_file}...")
+                ## Converting current chunk to temporary wav file 
+                sf.write('temp.wav',wav,self.sr)
+
+                ## reading  chunk
+                wav_audio = AudioSegment.from_file('temp.wav', format="wav",start_second=self.meta['start'][idx],duration=len_audio_s)
+
+                file_handle = wav_audio.export(mp3_file,
+                        format="mp3",
+                        bitrate="128k")
+
+
+            
+
+        
         
         ecoac = compute_ecoacoustics(wav, sr, Fmin = 100, Fmax=20000, refdB=self.ref_dB)
         wav = torch.tensor(wav)
