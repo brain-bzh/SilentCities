@@ -118,12 +118,11 @@ class Silent_dataset(Dataset):
         wav, sr = librosa.load(filename, sr=None, mono=True,
                               offset=self.meta['start'][idx], duration=len_audio_s)
         
-        ecoac = compute_ecoacoustics(wav, sr, Fmin = 100, Fmax=20000, refdB=self.ref_dB)
-
+        
         if sr != self.sr:
             wav = resample(wav, int(len_audio_s*self.sr))
         
-        # ecoac = compute_ecoacoustics(wav, self.sr, ref_mindb=self.ref_dB)
+        ecoac = compute_ecoacoustics(wav, sr, Fmin = 100, Fmax=20000, refdB=self.ref_dB)
         wav = torch.tensor(wav)
 
         return (wav.view(int(len_audio_s*self.sr)), {'name': os.path.basename(filename), 'start': self.meta['start'][idx],
