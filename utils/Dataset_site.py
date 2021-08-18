@@ -11,6 +11,7 @@ from tqdm import tqdm
 import librosa
 import pandas as pd
 
+import tempfile
 
 import torch
 
@@ -127,20 +128,23 @@ class Silent_dataset(Dataset):
 
         if not(self.to_mp3 is None):
             ## name of the mp3 file
-            mp3_file = os.path.join(self.to_mp3,f"{os.path.splitext(filename)[0]}_{self.meta['start'][idx]}.mp3")
-
+            mp3_file = os.path.join(self.to_mp3,f"{os.path.splitext(os.path.split(filename)[1])[0]}_{self.meta['start'][idx]}.mp3")
+            #print(mp3_file)
             if not(os.path.isfile(mp3_file)):
                 #print(f"Converting {mp3_file}...")
                 ## Converting current chunk to temporary wav file 
-                sf.write('temp.wav',wav,self.sr)
+
+                temp_name = next(tempfile._get_candidate_names()) + '.wav'
+                sf.write(temp_name,wav,self.sr)
 
                 ## reading  chunk
-                wav_audio = AudioSegment.from_file('temp.wav', format="wav",start_second=self.meta['start'][idx],duration=len_audio_s)
+                wav_audio = AudioSegment.from_file(temp_name, format="wav")
 
                 file_handle = wav_audio.export(mp3_file,
                         format="mp3",
                         bitrate="128k")
 
+                os.remove(temp_name)
 
             
 
