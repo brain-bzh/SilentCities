@@ -80,6 +80,7 @@ else:
 site_set = dataset.get_dataloader_site(
     args.site, args.folder, meta_site, df_site,args.metadata_folder,database = DATABASE, batch_size=args.batch_size,mp3folder=mp3folder)
 print('audio processing')
+print(f"Using CUDA : {args.nocuda}")
 
 for batch_idx, (inputs, info) in enumerate(tqdm(site_set)):
 
