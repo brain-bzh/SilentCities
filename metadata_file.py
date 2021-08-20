@@ -50,7 +50,8 @@ def metadata_generator(folder):
         for root, dirs, files in os.walk(folder, topdown=False):
             for name in files:
                 if name[-3:].casefold() == 'wav' and name[:2] != '._':
-                    print(os.path.join(root, name))
+                    if args.verbose:
+                        print(os.path.join(root, name))
                     filelist.append(os.path.join(root, name))
     else:
         for hdd_path in HDD:
@@ -63,11 +64,10 @@ def metadata_generator(folder):
         
         if (os.path.basename(wavfile) in filename_) == False:
             try :     
-                _, meta = utils.read_audio_hdr(wavfile, True) #meta data
+                _, meta = utils.read_audio_hdr(wavfile, args.verbose) #meta data
             
                 sr, x = wav.read(wavfile)
-                print(sr)
-                print(x.shape)
+                
                 if len(x)>1:
                     Df = Df.append({'datetime': meta['datetime'], 'filename': os.path.basename(wavfile), 'length' : len(x), 'sr' : sr, 'dB' : 20*np.log10(np.std(x))}, ignore_index=True)
                 else:
