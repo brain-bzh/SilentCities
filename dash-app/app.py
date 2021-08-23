@@ -22,9 +22,9 @@ from datetime import datetime
 import base64
 
 ##### Path
-PATH_MP3 = '/Users/nicolas/Downloads/mp3_sl/'
-PATH_DATABASE = "/Users/nicolas/Documents/SilentCities/database/public_final_metadata_geo_stats.csv"
-PATH_TAGSITE = "/Users/nicolas/Documents/SilentCities/SilentCities/ecoacoustique/NEW3/"
+PATH_MP3 = '/home/nfarrugi/bigdisk2/mp3_sl/'
+PATH_DATABASE = "/home/nfarrugi/SilentCities/database/public_final_metadata_geo_stats.csv"
+PATH_TAGSITE = "/home/nfarrugi/bigdisk2/meta_silentcities/site/"
 
 #### Initialization
 database = pd.read_csv(PATH_DATABASE)
@@ -187,5 +187,5 @@ def Update_audio(clickData):
 
     
 if __name__ == '__main__':
-    app.run_server(debug=True, port=os.getenv("PORT", "8051"))
+    app.run_server(debug=True, host='127.0.0.1',port=os.getenv("PORT", "8051"))
 
