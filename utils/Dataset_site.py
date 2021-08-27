@@ -153,7 +153,7 @@ class Silent_dataset(Dataset):
 
                 os.remove(temp_name)
         
-        ecoac = compute_ecoacoustics(wav, self.sr_eco, Fmin = 100, Fmax=20000, refdB=self.ref_dB)
+        ecoac = compute_ecoacoustics(wav, self.sr_eco[0], Fmin = 100, Fmax=20000, refdB=self.ref_dB)
         if sr != self.sr_tagging:
             wav = resample(wav_o, int(len_audio_s*self.sr_tagging))
         wav = torch.tensor(wav)
@@ -166,7 +166,7 @@ class Silent_dataset(Dataset):
         return len(self.meta['filename'])
 
 
-def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, database ,sr_eco=[48000.,44100.],sr_tagging=32000, batch_size=6,mp3folder = None,ncpu=NUM_CORE):
+def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, database ,sr_eco=[48000,44100],sr_tagging=32000, batch_size=6,mp3folder = None,ncpu=NUM_CORE):
     partIDidx = database[database.partID == int(site_ID)].index[0]
     file_refdB = database['ref_file'][partIDidx]
     if os.path.exists(os.path.join(meta_path, site_ID+'_metaloader.pkl')):
