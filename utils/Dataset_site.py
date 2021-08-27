@@ -148,10 +148,6 @@ class Silent_dataset(Dataset):
                         bitrate="128k")
 
                 os.remove(temp_name)
-
-            
-
-        
         
         ecoac = compute_ecoacoustics(wav, self.sr_eco, Fmin = 100, Fmax=20000, refdB=self.ref_dB)
         if sr != self.sr_eco:
