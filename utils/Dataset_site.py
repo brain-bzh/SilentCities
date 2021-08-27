@@ -126,19 +126,23 @@ class Silent_dataset(Dataset):
                               offset=self.meta['start'][idx], duration=len_audio_s)
         
         
-        if sr != self.sr_eco:
-            wav = resample(wav_o, int(len_audio_s*self.sr_eco))
+        if sr not in self.sr_eco:
+            wav = resample(wav_o, int(len_audio_s*self.sr_eco[0]))
+            srmp3 = self.sr_eco[0]
+        else:
+            srmp3=sr
+
 
         if not(self.to_mp3 is None):
             ## name of the mp3 file
             mp3_file = os.path.join(self.to_mp3,f"{os.path.splitext(os.path.split(filename)[1])[0]}_{self.meta['start'][idx]}.mp3")
             #print(mp3_file)
             if not(os.path.isfile(mp3_file)):
-                #print(f"Converting {mp3_file}...")
+                #print(f"Converting {mp3_file}...")                
                 ## Converting current chunk to temporary wav file in a temp folder
 
                 temp_name = os.path.join(defult_tmp_dir,next(tempfile._get_candidate_names()) + '.wav')
-                sf.write(temp_name,wav,self.sr_eco)
+                sf.write(temp_name,wav,srmp3)
 
                 ## reading  chunk
                 wav_audio = AudioSegment.from_file(temp_name, format="wav")
@@ -150,7 +154,7 @@ class Silent_dataset(Dataset):
                 os.remove(temp_name)
         
         ecoac = compute_ecoacoustics(wav, self.sr_eco, Fmin = 100, Fmax=20000, refdB=self.ref_dB)
-        if sr != self.sr_eco:
+        if sr != self.sr_tagging:
             wav = resample(wav_o, int(len_audio_s*self.sr_tagging))
         wav = torch.tensor(wav)
 
@@ -162,7 +166,7 @@ class Silent_dataset(Dataset):
         return len(self.meta['filename'])
 
 
-def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, database ,sr_eco=48000,sr_tagging=32000, batch_size=6,mp3folder = None,ncpu=NUM_CORE):
+def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, database ,sr_eco=[48000.,44100.],sr_tagging=32000, batch_size=6,mp3folder = None,ncpu=NUM_CORE):
     partIDidx = database[database.partID == int(site_ID)].index[0]
     file_refdB = database['ref_file'][partIDidx]
     if os.path.exists(os.path.join(meta_path, site_ID+'_metaloader.pkl')):
