@@ -25,6 +25,8 @@ parser.add_argument('--database', default=None, type=str,
 
 parser.add_argument('--nocuda', action='store_false',
                     help='Do not use the GPU for acceleration')
+parser.add_argument('--ncpu',default=1,type=int,
+                    help='Number of CPUs for parallelization')
 
 args = parser.parse_args()
 
@@ -78,7 +80,7 @@ else:
                     'POWERB_8k':[], 'POWERB_16k':[],
                     'clipwise_output':[], 'sorted_indexes' : [] ,'embedding' : []}
 site_set = dataset.get_dataloader_site(
-    args.site, args.folder, meta_site, df_site,args.metadata_folder,database = DATABASE, batch_size=args.batch_size,mp3folder=mp3folder)
+    args.site, args.folder, meta_site, df_site,args.metadata_folder,database = DATABASE, batch_size=args.batch_size,mp3folder=mp3folder,ncpu=args.ncpu)
 print('audio processing')
 print(f"Using CUDA : {args.nocuda}")
 

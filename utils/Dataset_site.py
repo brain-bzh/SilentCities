@@ -28,11 +28,10 @@ from utils import OctaveBand
 from pydub import AudioSegment
 import soundfile as sf
 
-NUM_CORE = multiprocessing.cpu_count() - 4
+NUM_CORE = multiprocessing.cpu_count()
 print(f'core numbers {NUM_CORE}')
 
-DEVICE = torch.device(
-    'cuda') if torch.cuda.is_available() else torch.device('cpu')
+DEVICE = torch.device('cpu') #torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 DATA_PATH = "dataloaders/"
 
@@ -164,7 +163,7 @@ class Silent_dataset(Dataset):
         return len(self.meta['filename'])
 
 
-def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, database ,sample_rate=32000, batch_size=6,mp3folder = None):
+def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, database ,sample_rate=32000, batch_size=6,mp3folder = None,ncpu=NUM_CORE):
     partIDidx = database[database.partID == int(site_ID)].index[0]
     file_refdB = database['ref_file'][partIDidx]
     if os.path.exists(os.path.join(meta_path, site_ID+'_metaloader.pkl')):
@@ -215,7 +214,7 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, dat
 
     site_set = Silent_dataset(meta_dataloader.reset_index(drop=True), sample_rate, file_refdB,mp3folder)
     site_set = torch.utils.data.DataLoader(
-        site_set, batch_size=batch_size, shuffle=False, num_workers=NUM_CORE-1)
+        site_set, batch_size=batch_size, shuffle=False, num_workers=ncpu)
 
     return site_set
 
