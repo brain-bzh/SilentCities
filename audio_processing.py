@@ -1,6 +1,7 @@
 import os
 import torch
 import numpy as np
+import multiprocessing
 import pandas as pd
 import argparse
 from tqdm import tqdm
@@ -8,6 +9,8 @@ from audioset_tagging_cnn.inference import audio_tagging
 import utils.Dataset_site as dataset
 import utils.utils
 from analysis.tagging_validation import tagging_validate
+
+NUM_CORE = multiprocessing.cpu_count()
 
 parser = argparse.ArgumentParser(
     description='Silent City Audio Tagging with pretrained LeeNet22 on Audioset')
@@ -25,7 +28,7 @@ parser.add_argument('--database', default=None, type=str,
 
 parser.add_argument('--nocuda', action='store_false',
                     help='Do not use the GPU for acceleration')
-parser.add_argument('--ncpu',default=1,type=int,
+parser.add_argument('--ncpu',default=NUM_CORE-4,type=int,
                     help='Number of CPUs for parallelization')
 
 args = parser.parse_args()

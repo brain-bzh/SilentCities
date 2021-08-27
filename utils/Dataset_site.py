@@ -29,7 +29,7 @@ from pydub import AudioSegment
 import soundfile as sf
 
 NUM_CORE = multiprocessing.cpu_count()
-print(f'core numbers {NUM_CORE}')
+print(f'Max CPU count on this machine: {NUM_CORE}')
 
 DEVICE = torch.device('cpu') #torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
