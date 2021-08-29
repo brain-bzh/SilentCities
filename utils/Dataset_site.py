@@ -131,6 +131,7 @@ class Silent_dataset(Dataset):
             srmp3 = self.sr_eco[0]
         else:
             srmp3=sr
+            wav=wav_o
 
 
         if not(self.to_mp3 is None):
