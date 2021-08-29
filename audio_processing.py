@@ -83,7 +83,7 @@ else:
                     'POWERB_8k':[], 'POWERB_16k':[],
                     'clipwise_output':[], 'sorted_indexes' : [] ,'embedding' : []}
 site_set = dataset.get_dataloader_site(
-    args.site, args.folder, meta_site, df_site,args.metadata_folder,database = DATABASE, sr_eco=[48000.,44100.],sr_tagging=32000.,batch_size=args.batch_size,mp3folder=mp3folder,ncpu=args.ncpu)
+    args.site, args.folder, meta_site, df_site,args.metadata_folder,database = DATABASE, sr_eco=[48000,44100],sr_tagging=32000,batch_size=args.batch_size,mp3folder=mp3folder,ncpu=args.ncpu)
 print('audio processing')
 print(f"Using CUDA : {args.nocuda}")
 
