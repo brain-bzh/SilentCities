@@ -54,7 +54,7 @@ def get_heatmaps(site, path):
     fig.add_trace(go.Scattergl(x = data['datetime'], y = data['biophony'], name= 'Biophonie', line = dict(color='green'), opacity=0.5), row=4, col=1)
     
    
-    fig.update_layout(margin={"r":0,"t":50,"l":0,"b":50},coloraxis_colorbar=dict(
+    fig.update_layout(margin={"r":0,"t":50,"l":0,"b":0},coloraxis_colorbar=dict(
         title="<b>Probabilité</b>",titleside='right',
                         thicknessmode="pixels", thickness=30,
                         lenmode="pixels", len=400,
