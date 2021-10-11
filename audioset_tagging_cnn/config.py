@@ -1,14 +1,21 @@
 ### modified from https://github.com/qiuqiangkong/audioset_tagging_cnn
 import numpy as np
 import csv
+import os
 
 sample_rate = 32000
 audio_length = sample_rate * 10     # Audio clips are 10-second
 
 # Load label
-with open('audioset_tagging_cnn/class_labels_indices.csv', 'r') as f:
-    reader = csv.reader(f, delimiter=',')
-    lines = list(reader)
+try:
+  with open('audioset_tagging_cnn/class_labels_indices.csv', 'r') as f:
+      reader = csv.reader(f, delimiter=',')
+      lines = list(reader)
+except:
+  curr_path = os.path.abspath(os.getcwd())
+  with open(os.path.dirname(curr_path)+ '/audioset_tagging_cnn/class_labels_indices.csv', 'r') as f:
+      reader = csv.reader(f, delimiter=',')
+      lines = list(reader)
 
 labels = []
 ids = []    # Each label has a unique id such as "/m/068hy"
