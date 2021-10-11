@@ -47,7 +47,7 @@ wavefig, path_current_audio = pf.get_sample_fig(available_site[0], f"{data['name
 encoded_sound = base64.b64encode(open(path_current_audio, 'rb').read())
 
 # Init_csv_file
-header = ["site", 'file', 'datetime', 'current_time', 'Antropophy','Geophony', 'Biophony', 'comm']
+header = ["site", 'file', 'datetime', 'current_time', 'Antropophy','Geophony', 'Biophony', 'bruit','comm']
 idx = 0
 LOGFILENAME = f'''logfile/{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv'''
 if not os.path.exists('logfile/'):
