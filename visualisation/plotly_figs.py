@@ -34,10 +34,10 @@ def get_heatmaps(site, path):
     macro_cat = {'geophony':['Wind', 'Rain', 'River', 'Wave', 'Thunder'],
                  'biophony': ['Bird', 'Amphibian', 'Insect', 'Mammal', 'Reptile'], 
                  'anthropophony': ['Walking', 'Cycling', 'Beep', 'Car', 'Car honk', 'Motorbike', 'Plane', 'Helicoptere', 'Boat', 'Others_motors', 'Shoot', 'Bell', 'Talking', 'Music', 'Dog bark', 'Kitchen sounds', 'Rolling shutter']}
-    try:
-        data = pd.read_csv(os.path.join(path, f'tagging_site_{site:04d}.csv'))
-    except:
-        data = pd.read_csv(os.path.join(path, f'results_{site:04d}.csv'))
+    # try:
+    #     data = pd.read_csv(os.path.join(path, f'tagging_site_{site:04d}.csv'))
+    # except:
+    data = pd.read_csv(os.path.join(path, f'results_{site:04d}.csv'))
 
 
     fig = make_subplots(rows=4, cols=1, shared_xaxes=True, subplot_titles=("<b>Anthropophonie</b>", "<b>Géophonie</b>", "<b>Biophonie</b>", ""), vertical_spacing=0.04)

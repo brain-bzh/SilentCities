@@ -28,14 +28,17 @@ import base64
 
 PATH_MP3 = '/Users/nicolas/Downloads/mp3_sl/'
 PATH_DATABASE = "/Users/nicolas/Documents/SilentCities/database/public_final_metadata_geo_stats.csv"
-PATH_TAGSITE = "/Users/nicolas/Documents/SilentCities/SilentCities/ecoacoustique/NEW3/"
+PATH_TAGSITE = "/Users/nicolas/Documents/SilentCities/database/meta_silentcities"
 
 #### Initialization
 database = pd.read_csv(PATH_DATABASE)
 
 # get available site
-available_site = glob(os.path.join(PATH_MP3, '*/'))
-available_site = np.sort([int(i[-5:-1]) for i in available_site])
+available_site_mp3 = glob(os.path.join(PATH_MP3, '*/'))
+available_site_mp3 = np.sort([int(i[-5:-1]) for i in available_site_mp3])
+available_site_process = glob(os.path.join(PATH_TAGSITE, 'results*'))
+available_site_process = np.sort([int(i[-8:-4]) for i in available_site_process])
+available_site = list(set(available_site_process) & set(available_site_mp3))
 database = database[database['partID'].isin(available_site)].reset_index(drop=True)
 
 
