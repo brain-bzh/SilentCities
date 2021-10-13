@@ -34,6 +34,12 @@ def get_heatmaps(site, path):
     macro_cat = {'geophony':['Wind', 'Rain', 'River', 'Wave', 'Thunder'],
                  'biophony': ['Bird', 'Amphibian', 'Insect', 'Mammal', 'Reptile'], 
                  'anthropophony': ['Walking', 'Cycling', 'Beep', 'Car', 'Car honk', 'Motorbike', 'Plane', 'Helicoptere', 'Boat', 'Others_motors', 'Shoot', 'Bell', 'Talking', 'Music', 'Dog bark', 'Kitchen sounds', 'Rolling shutter']}
+    
+    macro_cat_fr = {'geophony' : ['Vent', 'Pluie', 'Rivière', 'Vague', 'Tonnerre'],
+                 'biophony' : ['Oiseau', 'Amphibien', 'Insecte', 'Mammifère', 'Reptile'], 
+                 'anthropophony' : ['Marche', 'Vélo', 'Bip', 'Voiture', 'Klaxon', 'Moto', 'Avion', 'Hélicoptère', 'Bateau', 'Autres_moteurs', 'Tir', 'Cloche', 'Parler', 'Musique', 'Aboiement de chien', 'Bruits de cuisine', 'Volet roulant']}
+    
+
     # try:
     #     data = pd.read_csv(os.path.join(path, f'tagging_site_{site:04d}.csv'))
     # except:
@@ -42,9 +48,9 @@ def get_heatmaps(site, path):
 
     fig = make_subplots(rows=4, cols=1, shared_xaxes=True, subplot_titles=("<b>Anthropophonie</b>", "<b>Géophonie</b>", "<b>Biophonie</b>", ""), vertical_spacing=0.04)
 
-    fig.add_trace(go.Heatmap(x = data['datetime'], y = macro_cat['geophony'], z = data[[f'tag_{idx}' for idx in macro_cat['geophony']]].T, coloraxis='coloraxis', name='Géophonie',colorscale='Hot'), row=2, col=1)
-    fig.add_trace(go.Heatmap(x = data['datetime'], y = macro_cat['biophony'], z = data[[f'tag_{idx}' for idx in macro_cat['biophony']]].T, coloraxis='coloraxis', name='Biophonie',colorscale='Hot'), row=3, col=1)
-    fig.add_trace(go.Heatmap(x = data['datetime'], y = macro_cat['anthropophony'], z = data[[f'tag_{idx}' for idx in macro_cat['anthropophony']]].T, coloraxis='coloraxis', name='Anthropophonie', colorscale='viridis'), row=1, col=1)
+    fig.add_trace(go.Heatmap(x = data['datetime'], y = macro_cat_fr['geophony'], z = data[[f'tag_{idx}' for idx in macro_cat['geophony']]].T, coloraxis='coloraxis', name='Géophonie',colorscale='Hot'), row=2, col=1)
+    fig.add_trace(go.Heatmap(x = data['datetime'], y = macro_cat_fr['biophony'], z = data[[f'tag_{idx}' for idx in macro_cat['biophony']]].T, coloraxis='coloraxis', name='Biophonie',colorscale='Hot'), row=3, col=1)
+    fig.add_trace(go.Heatmap(x = data['datetime'], y = macro_cat_fr['anthropophony'], z = data[[f'tag_{idx}' for idx in macro_cat['anthropophony']]].T, coloraxis='coloraxis', name='Anthropophonie', colorscale='viridis'), row=1, col=1)
     # for idx in range(3):
     #     fig.add_trace(go.Scattergl(x = data['datetime'], y = data['tag_{}'.format(macro_cat['geophony'][idx])], name=macro_cat['geophony'][idx]), row=1, col=1)
     #     fig.add_trace(go.Scattergl(x = data['datetime'], y = data['tag_{}'.format(macro_cat['biophony'][idx])],  name=macro_cat['biophony'][idx]), row=2, col=1)
