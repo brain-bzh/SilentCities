@@ -67,12 +67,25 @@ def get_heatmaps(site, path):
 
     return fig, data
 
-def get_sample_fig(site, file, path):
-    path_audio = os.path.join(path, f'{site:04d}', file)
-    audio, sr = librosa.load(path_audio, sr = 44100)
+def get_sample_fig(site, file, path, error = False):
 
-    audio = audio[:int(10*sr)]
-    N = len(audio)
+    if error :
+        sr = 44100
+        N = int(sr*10)
+        audio = np.ones(N)
+    else:
+        path_audio = os.path.join(path, f'{site:04d}', file)
+        try:
+            audio, sr = librosa.load(path_audio, sr = 44100)
+            audio = audio[:int(10*sr)]
+        except:
+            sr = 44100
+            N = int(sr*10)
+            audio = np.ones(N)
+            error = True
+
+        
+        N = len(audio)
     Zxx = librosa.feature.melspectrogram(y=audio, sr=sr, n_mels=256, fmax=20000)
     t, f, Zxx = ld.specshow(Zxx, sr = sr, fmax = 20000,y_axis='mel', x_axis='time', ref = np.max)
 
@@ -87,7 +100,7 @@ def get_sample_fig(site, file, path):
     fig.update_yaxes(title = 'Amplitude (-)',row=1, col=1)
     fig.update_xaxes(title = 'Temps (s)',row=2, col=1)
     fig.update_layout(margin={"r":0,"t":30,"l":0,"b":0})
-    return fig, path_audio
+    return fig, path_audio, error
     
 
 

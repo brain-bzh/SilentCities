@@ -22,13 +22,13 @@ from datetime import datetime
 import base64
 
 ##### Path
-PATH_MP3 = '/home/nfarrugi/bigdisk2/mp3_sl/'
-PATH_DATABASE = "/home/nfarrugi/SilentCities/database/public_final_metadata_geo_stats.csv"
-PATH_TAGSITE = "/home/nfarrugi/bigdisk2/meta_silentcities/site/"
+# PATH_MP3 = '/home/nfarrugi/bigdisk2/mp3_sl/'
+# PATH_DATABASE = "/home/nfarrugi/SilentCities/database/public_final_metadata_geo_stats.csv"
+# PATH_TAGSITE = "/home/nfarrugi/bigdisk2/meta_silentcities/site/"
 
-# PATH_MP3 = '/Users/nicolas/Downloads/mp3_sl/'
-# PATH_DATABASE = "/Users/nicolas/Documents/SilentCities/database/public_final_metadata_geo_stats.csv"
-# PATH_TAGSITE = "/Users/nicolas/Documents/SilentCities/SilentCities/ecoacoustique/NEW3/"
+PATH_MP3 = '/Users/nicolas/Downloads/mp3_sl/'
+PATH_DATABASE = "/Users/nicolas/Documents/SilentCities/database/public_final_metadata_geo_stats.csv"
+PATH_TAGSITE = "/Users/nicolas/Documents/SilentCities/SilentCities/ecoacoustique/NEW3/"
 
 #### Initialization
 database = pd.read_csv(PATH_DATABASE)
@@ -43,7 +43,7 @@ database = database[database['partID'].isin(available_site)].reset_index(drop=Tr
 current_partID = available_site[0]
 figmap = pf.get_map_fig(database)
 figindic, data = pf.get_heatmaps(available_site[0], path=PATH_TAGSITE)
-wavefig, path_current_audio = pf.get_sample_fig(available_site[0], f"{data['name'][0][:-4]}_{int(data['start'][0])}.mp3", path=PATH_MP3)
+wavefig, path_current_audio, error_audio_file = pf.get_sample_fig(available_site[0], f"{data['name'][0][:-4]}_{int(data['start'][0])}.mp3", path=PATH_MP3)
 encoded_sound = base64.b64encode(open(path_current_audio, 'rb').read())
 
 # Init_csv_file
@@ -221,23 +221,37 @@ def Update_audio(clickData, val_text, val_check):
     global data
     global current_partID
     global idx
+    global error_audio_file
 
     print(val_text)
     print(val_check)
     print([current_partID, str(data['name'][idx])[:-4], data['datetime'][idx], datetime.now().strftime('%Y%m%d_%H%M%S'), 'Antropophony' in val_check, 'Geophony' in val_check, 'Biophony' in val_check, 'Bruit' in val_check, val_text])
     with open(LOGFILENAME, 'a', encoding='UTF8') as f:
         writer = csv.writer(f)
-        writer.writerow([current_partID, str(data['name'][idx])[:-4], data['datetime'][idx], datetime.now().strftime('%Y%m%d_%H%M%S'), 'Antropophony' in val_check, 'Geophony' in val_check, 'Biophony' in val_check, 'Bruit' in val_check, val_text])
+        if error_audio_file:
+
+            writer.writerow([current_partID, str(data['name'][idx])[:-4], data['datetime'][idx], datetime.now().strftime('%Y%m%d_%H%M%S'), 'Antropophony' in val_check, 'Geophony' in val_check, 'Biophony' in val_check, 'Bruit' in val_check, 'error'])
+        else:
+            writer.writerow([current_partID, str(data['name'][idx])[:-4], data['datetime'][idx], datetime.now().strftime('%Y%m%d_%H%M%S'), 'Antropophony' in val_check, 'Geophony' in val_check, 'Biophony' in val_check, 'Bruit' in val_check, val_text])
 
     x = clickData['points'][0]['x']
-    idx = data.index[data["datetime"]==x][0]
+    try :
+        idx = data.index[data["datetime"]==x][0]
+        text = [f"Information fichier wav : file name {str(data['name'][idx])[:-4]}_{int(data['start'][idx])}.mp3, date : {datetime.strptime(data['datetime'][idx], '%Y%m%d_%H%M%S')}",html.Br() ,f"Anthropophonie : {data['anthropophony'][idx]*100:.1f} %", html.Br() ,f"Geophonie : {data['geophony'][idx]*100:.1f} %, ", html.Br() ,f"Biophonie : {data['biophony'][idx]*100:.1f} %,"]
+        error_audio_file = False
+    except :
+        wavefig, path_current_audio, error_audio_file = pf.get_sample_fig(current_partID, f"ERROR", path='ERROR', error=True)
+        text=['erreur fichier audio']
 
     
-    wavefig, path_current_audio = pf.get_sample_fig(current_partID, f"{str(data['name'][idx])[:-4]}_{int(data['start'][idx])}.mp3", path=PATH_MP3)
+    wavefig, path_current_audio, error_audio_file = pf.get_sample_fig(current_partID, f"{str(data['name'][idx])[:-4]}_{int(data['start'][idx])}.mp3", path=PATH_MP3)
     
+    if error_audio_file:
+        text=['erreur fichier audio']
+        return wavefig, 'None', text, '', []
+
     encoded_sound = base64.b64encode(open(path_current_audio, 'rb').read())
     src = 'data:audio/mpeg;base64,{}'.format(encoded_sound.decode())
-    text = [f"Information fichier wav : file name {str(data['name'][idx])[:-4]}_{int(data['start'][idx])}.mp3, date : {datetime.strptime(data['datetime'][idx], '%Y%m%d_%H%M%S')}",html.Br() ,f"Anthropophonie : {data['anthropophony'][idx]*100:.1f} %", html.Br() ,f"Geophonie : {data['geophony'][idx]*100:.1f} %, ", html.Br() ,f"Biophonie : {data['biophony'][idx]*100:.1f} %,"]
     
     return wavefig, src, text, '', []
 
