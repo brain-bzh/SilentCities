@@ -22,13 +22,13 @@ from datetime import datetime
 import base64
 
 ##### Path
-# PATH_MP3 = '/home/nfarrugi/bigdisk2/mp3_sl/'
-# PATH_DATABASE = "/home/nfarrugi/SilentCities/database/public_final_metadata_geo_stats.csv"
-# PATH_TAGSITE = "/home/nfarrugi/bigdisk2/meta_silentcities/site/"
+PATH_MP3 = '/home/nfarrugi/bigdisk2/mp3_sl/'
+PATH_DATABASE = "/home/nfarrugi/SilentCities/database/public_final_metadata_geo_stats.csv"
+PATH_TAGSITE = "/home/nfarrugi/bigdisk2/meta_silentcities/site/"
 
-PATH_MP3 = '/Users/nicolas/Downloads/mp3_sl/'
-PATH_DATABASE = "/Users/nicolas/Documents/SilentCities/database/public_final_metadata_geo_stats.csv"
-PATH_TAGSITE = "/Users/nicolas/Documents/SilentCities/database/meta_silentcities"
+#PATH_MP3 = '/Users/nicolas/Downloads/mp3_sl/'
+#PATH_DATABASE = "/Users/nicolas/Documents/SilentCities/database/public_final_metadata_geo_stats.csv"
+#PATH_TAGSITE = "/Users/nicolas/Documents/SilentCities/database/meta_silentcities"
 
 #### Initialization
 database = pd.read_csv(PATH_DATABASE)
@@ -67,8 +67,8 @@ table_header_style = {
     "textAlign": "center",
 }
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+app = dash.Dash(__name__)
 styles = {
     'pre': {
         'border': 'thin lightgrey solid',
