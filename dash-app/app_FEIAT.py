@@ -48,7 +48,7 @@ figmap = pf.get_map_fig(database)
 figindic, data = pf.get_heatmaps(available_site[0], path=PATH_TAGSITE)
 wavefig, path_current_audio, error_audio_file = pf.get_sample_fig(available_site[0], f"{data['name'][0][:-4]}_{int(data['start'][0])}.mp3", path=PATH_MP3)
 encoded_sound = base64.b64encode(open(path_current_audio, 'rb').read())
-
+data_1 = data.copy()
 # Init_csv_file
 header = ["site", 'file', 'datetime', 'current_time', 'Antropophy','Geophony', 'Biophony', 'bruit','comm']
 idx = 0
@@ -222,20 +222,21 @@ def Update_heatmap(clickData):
     State('checklist', 'value')])
 def Update_audio(clickData, val_text, val_check):
     global data
+    global data_1
     global current_partID
     global idx
     global error_audio_file
 
     print(val_text)
     print(val_check)
-    print([current_partID, str(data['name'][idx])[:-4], data['datetime'][idx], datetime.now().strftime('%Y%m%d_%H%M%S'), 'Antropophony' in val_check, 'Geophony' in val_check, 'Biophony' in val_check, 'Bruit' in val_check, val_text])
+    print([current_partID, str(data_1['name'][idx])[:-4], data_1['datetime'][idx], datetime.now().strftime('%Y%m%d_%H%M%S'), 'Antropophony' in val_check, 'Geophony' in val_check, 'Biophony' in val_check, 'Bruit' in val_check, val_text])
     with open(LOGFILENAME, 'a', encoding='UTF8') as f:
         writer = csv.writer(f)
         if error_audio_file:
 
-            writer.writerow([current_partID, str(data['name'][idx])[:-4], data['datetime'][idx], datetime.now().strftime('%Y%m%d_%H%M%S'), 'Antropophony' in val_check, 'Geophony' in val_check, 'Biophony' in val_check, 'Bruit' in val_check, 'error'])
+            writer.writerow([current_partID, str(data_1['name'][idx])[:-4], data_1['datetime'][idx], datetime.now().strftime('%Y%m%d_%H%M%S'), 'Antropophony' in val_check, 'Geophony' in val_check, 'Biophony' in val_check, 'Bruit' in val_check, 'error'])
         else:
-            writer.writerow([current_partID, str(data['name'][idx])[:-4], data['datetime'][idx], datetime.now().strftime('%Y%m%d_%H%M%S'), 'Antropophony' in val_check, 'Geophony' in val_check, 'Biophony' in val_check, 'Bruit' in val_check, val_text])
+            writer.writerow([current_partID, str(data_1['name'][idx])[:-4], data_1['datetime'][idx], datetime.now().strftime('%Y%m%d_%H%M%S'), 'Antropophony' in val_check, 'Geophony' in val_check, 'Biophony' in val_check, 'Bruit' in val_check, val_text])
 
     x = clickData['points'][0]['x']
     try :
@@ -255,6 +256,8 @@ def Update_audio(clickData, val_text, val_check):
 
     encoded_sound = base64.b64encode(open(path_current_audio, 'rb').read())
     src = 'data:audio/mpeg;base64,{}'.format(encoded_sound.decode())
+
+    data_1 = data.copy()
     
     return wavefig, src, text, '', []
 
