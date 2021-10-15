@@ -258,7 +258,7 @@ def Update_audio(clickData, val_text, val_check):
         text=['erreur fichier audio']
         return wavefig, 'None', text, '', []
 
-    encoded_sound = base64.b64encode(open(path_current_audio, 'rb').read())
+    encoded_sound = base64.b64encode(open('temp.mp3', 'rb').read())
     src = 'data:audio/mpeg;base64,{}'.format(encoded_sound.decode())
 
     data_1 = data.copy()

@@ -13,6 +13,10 @@ import time
 sys.path.insert(0, "../")
 from utils import librosa_display as ld
 
+from pydub import AudioSegment
+import soundfile as sf
+import librosa
+
 
 def get_map_fig(database):
     fig = px.scatter_mapbox(database, lat="lat", lon="lng", color = "s_statsmean",hover_data=['partID', 'city', 'country', "recorder"], zoom=1, height = 600, size_max=10)
@@ -83,6 +87,14 @@ def get_sample_fig(site, file, path, error = False):
         path_audio = os.path.join(path, f'{site:04d}', file)
         try:
             audio, sr = librosa.load(path_audio, sr = 44100)
+            sf.write('temp.wav',audio/np.max(audio)/1.2,44100)
+            ## reading  chunk
+            wav_audio = AudioSegment.from_file('temp.wav', format="wav")
+            
+            file_handle = wav_audio.export('temp.mp3',
+			format="mp3",
+			bitrate="128k")
+            
             audio = audio[:int(10*sr)]
         except:
             sr = 44100
