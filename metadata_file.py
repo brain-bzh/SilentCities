@@ -64,17 +64,17 @@ def metadata_generator(folder):
         
         if (os.path.basename(wavfile) in filename_) == False:
             try :     
-                _, meta = utils.read_audio_hdr(wavfile, args.verbose) #meta data
+                _, meta = utils.read_audio_hdr(wavfile, verbose=args.verbose) #meta data
             
                 sr, x = wav.read(wavfile)
                 
                 if len(x)>1:
-                    Df = Df.append({'datetime': meta['datetime'], 'filename': os.path.basename(wavfile), 'length' : len(x), 'sr' : sr, 'dB' : 20*np.log10(np.std(x))}, ignore_index=True)
+                    Df = pd.concat(Df,{'datetime': meta['datetime'], 'filename': os.path.basename(wavfile), 'length' : len(x), 'sr' : sr, 'dB' : 20*np.log10(np.std(x))}, ignore_index=True)
                 else:
-                    Df_error = Df_error.append({'filename': os.path.basename(wavfile)}, ignore_index=True)
+                    Df_error = pd.concat(Df_error,{'filename': os.path.basename(wavfile)}, ignore_index=True)
             except :
                 try: 
-                    Df_error = Df_error.append({'filename': os.path.basename(wavfile)}, ignore_index=True)
+                    Df_error = pd.concat(Df_error,{'filename': os.path.basename(wavfile)}, ignore_index=True)
                 except :
                     pass
             
