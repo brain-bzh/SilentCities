@@ -77,6 +77,61 @@ def get_heatmaps(site, path):
 
     return fig, data
 
+def get_night_day(datetime):
+    time_vec = np.zeros(len(datetime))
+
+    return(time_vec)
+
+def get_heatmaps_nd(site, path, title = None):
+    global data
+
+    macro_cat = {'geophony':['Wind', 'Rain', 'River', 'Wave', 'Thunder'],
+                 'biophony': ['Bird', 'Amphibian', 'Insect', 'Mammal', 'Reptile'], 
+                 'anthropophony': ['Walking', 'Cycling', 'Beep', 'Car', 'Car honk', 'Motorbike', 'Plane', 'Helicoptere', 'Boat', 'Others_motors', 'Shoot', 'Bell', 'Talking', 'Music', 'Dog bark', 'Kitchen sounds', 'Rolling shutter']}
+    
+    macro_cat_fr = {'geophony' : ['Vent', 'Pluie', 'Rivière', 'Vague', 'Tonnerre'],
+                 'biophony' : ['Oiseau', 'Amphibien', 'Insecte', 'Mammifère', 'Reptile'], 
+                 'anthropophony' : ['Marche', 'Vélo', 'Bip', 'Voiture', 'Klaxon', 'Moto', 'Avion', 'Hélicoptère', 'Bateau', 'Autres_moteurs', 'Tir', 'Cloche', 'Parler', 'Musique', 'Aboiement de chien', 'Bruits de cuisine', 'Volet roulant']}
+    
+
+    # try:
+    #     data = pd.read_csv(os.path.join(path, f'tagging_site_{site:04d}.csv'))
+    # except:
+    data = pd.read_csv(os.path.join(path, f'results_{site:04d}.csv'))
+
+    day = np.load('001.npy')
+
+    data['datetime'].to_csv('/Users/nicolas/Desktop/JB/date001.csv')
+    fig = make_subplots(rows=5, cols=1, shared_xaxes=True, subplot_titles=("<b>Anthropophonie</b>", "<b>Géophonie</b>", "<b>Biophonie</b>", "", "<b>jour/nuit</b>"), vertical_spacing=0.04)
+
+    fig.add_trace(go.Heatmap(x = data['datetime'], y = macro_cat_fr['geophony'], z = data[[f'tag_{idx}' for idx in macro_cat['geophony']]].T, coloraxis='coloraxis', name='Géophonie',colorscale='Hot'), row=2, col=1)
+    fig.add_trace(go.Heatmap(x = data['datetime'], y = macro_cat_fr['biophony'], z = data[[f'tag_{idx}' for idx in macro_cat['biophony']]].T, coloraxis='coloraxis', name='Biophonie',colorscale='Hot'), row=3, col=1)
+    fig.add_trace(go.Heatmap(x = data['datetime'], y = macro_cat_fr['anthropophony'], z = data[[f'tag_{idx}' for idx in macro_cat['anthropophony']]].T, coloraxis='coloraxis', name='Anthropophonie', colorscale='viridis'), row=1, col=1)
+    # for idx in range(3):
+    #     fig.add_trace(go.Scattergl(x = data['datetime'], y = data['tag_{}'.format(macro_cat['geophony'][idx])], name=macro_cat['geophony'][idx]), row=1, col=1)
+    #     fig.add_trace(go.Scattergl(x = data['datetime'], y = data['tag_{}'.format(macro_cat['biophony'][idx])],  name=macro_cat['biophony'][idx]), row=2, col=1)
+    #     fig.add_trace(go.Scattergl(x = data['datetime'], y = data['tag_{}'.format(macro_cat['anthropophony'][idx])],  name=macro_cat['anthropophony'][idx]), row=3, col=1)
+    fig.add_trace(go.Scattergl(x = data['datetime'], y = data['anthropophony'],name='Anthropophonie', line = dict(color='black'), opacity=0.5), row=4, col=1)
+    fig.add_trace(go.Scattergl(x = data['datetime'], y = data['geophony'],name="Géophonie", line = dict(color='blue'), opacity=0.5), row=4, col=1)
+    fig.add_trace(go.Scattergl(x = data['datetime'], y = data['biophony'], name= 'Biophonie', line = dict(color='green'), opacity=0.5), row=4, col=1)
+    fig.add_trace(go.Scattergl(x = data['datetime'][::10], y = day[::10], name= 'jour/nuit', line = dict(color='red'), opacity=0.5), row=5, col=1)
+    
+    fig.update_layout(title = title)
+    fig.update_layout(margin={"r":0,"t":50,"l":0,"b":0},coloraxis_colorbar=dict(
+        title="<b>Probabilité</b>",titleside='right',
+                        thicknessmode="pixels", thickness=30,
+                        lenmode="pixels", len=400,
+                        yanchor="bottom", y=0.0,
+                        xanchor="right", x=1.1
+                        ),yaxis = {'fixedrange': True}, height=800)
+    fig.update_yaxes({'fixedrange': True}, row=2, col=1)
+    fig.update_yaxes({'fixedrange': True}, row=3, col=1)
+    fig.update_yaxes({'fixedrange': True}, row=4, col=1)
+    fig.update_yaxes({'fixedrange': True}, row=5, col=1)
+
+    return fig, data
+
+
 def get_sample_fig(site, file, path, error = False):
 
     if error :

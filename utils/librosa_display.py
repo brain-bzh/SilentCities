@@ -590,7 +590,7 @@ def __envelope(x, hop):
     return x_frame.max(axis=1)
 
 
-@util.decorators.deprecated("0.8.1", "0.9.0")
+#@util.decorators.deprecated("0.8.1", "0.9.0")
 def waveplot(
     y,
     sr=22050,
