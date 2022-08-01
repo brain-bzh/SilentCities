@@ -26,9 +26,13 @@ import base64
 # PATH_DATABASE = "/home/nfarrugi/SilentCities/database/public_final_metadata_geo_stats.csv"
 # PATH_TAGSITE = "/home/nfarrugi/bigdisk2/meta_silentcities/site/"
 
-PATH_MP3 = '/data/mp3_sl/'
-PATH_DATABASE = "/data/meta_silentcities/public_final_metadata_geo_stats.csv"
-PATH_TAGSITE = "/data/meta_silentcities/site/"
+# PATH_MP3 = '/data/mp3_sl/'
+# PATH_DATABASE = "/data/meta_silentcities/public_final_metadata_geo_stats.csv"
+# PATH_TAGSITE = "/data/meta_silentcities/site/"
+
+PATH_MP3 = '/Volumes/LaCie/silent_cities/mp3_sl/'
+PATH_DATABASE = "/Volumes/LaCie/silent_cities/public_final_metadata_geo_stats.csv"
+PATH_TAGSITE = "/Volumes/LaCie/silent_cities/site/"
 
 # PATH_MP3 = '/Users/nicolas/Downloads/mp3_sl/'
 # PATH_DATABASE = "/Users/nicolas/Documents/SilentCities/database/public_final_metadata_geo_stats.csv"
@@ -271,5 +275,5 @@ def Update_audio(clickData, val_text, val_check):
 
     
 if __name__ == '__main__':
-    app.run_server(debug=False, host='127.0.0.1',port=os.getenv("PORT", "8051"))
+    app.run_server(debug=False, host='127.0.0.1',port=os.getenv("PORT", "8052"))
 
