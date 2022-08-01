@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
-
+import librosa
 import utils.utils as utils
 import argparse
 
@@ -65,16 +65,19 @@ def metadata_generator(folder):
         if (os.path.basename(wavfile) in filename_) == False:
             try :     
                 _, meta = utils.read_audio_hdr(wavfile, verbose=args.verbose) #meta data
-            
-                sr, x = wav.read(wavfile)
-                
+                try:
+                    sr, x = wav.read(wavfile)
+                except:
+                    x, sr = librosa.load(wavfile, sr = None)
+                    x = x*2**15
+
                 if len(x)>1:
                     Df = pd.concat(Df,{'datetime': meta['datetime'], 'filename': os.path.basename(wavfile), 'length' : len(x), 'sr' : sr, 'dB' : 20*np.log10(np.std(x))}, ignore_index=True)
                 else:
                     Df_error = pd.concat(Df_error,{'filename': os.path.basename(wavfile)}, ignore_index=True)
-            except :
+            except Exception as e:
                 try: 
-                    Df_error = pd.concat(Df_error,{'filename': os.path.basename(wavfile)}, ignore_index=True)
+                    Df_error = pd.concat(Df_error,{'filename': os.path.basename(wavfile), "error": e}, ignore_index=True)
                 except :
                     pass
             
