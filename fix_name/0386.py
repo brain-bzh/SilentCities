@@ -22,8 +22,6 @@ for root, dirs, files in os.walk(folder, topdown=False):
 for path_name in filelist:
     name = os.path.basename(path_name)
     path = os.path.dirname(path_name)
-    print(name[5:8+6+1+5])
-   
     if name[0] == "B":
         os.rename(path_name, os.path.join(path, name[5:8+6+1+5] + '.wav'))
     else:
