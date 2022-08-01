@@ -1,11 +1,5 @@
 ## Author : Nicolas Farrugia, Feb/March 2020
 
-import torch
-from torchvision.io import read_video,read_video_timestamps
-
-import matplotlib.patches as patches
-from matplotlib import pyplot as plt
-
 import datetime
 import pickle
 import os
