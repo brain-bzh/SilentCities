@@ -178,7 +178,40 @@ def get_sample_fig(site, file, path, error = False):
 
 
 
+def get_heatmapsMACROCAT(site, path):
+    global data
+
+
+    # try:
+    #     data = pd.read_csv(os.path.join(path, f'tagging_site_{site:04d}.csv'))
+    # except:
+    data = pd.read_csv(os.path.join(path, f'results_{site:04d}.csv'))
+
+
+    fig = make_subplots(rows=3, cols=1, shared_xaxes=True, subplot_titles=("<b>Anthropophonie</b>", "<b>Géophonie</b>", "<b>Biophonie</b>"), vertical_spacing=0.04)
+
     
+    # for idx in range(3):
+    #     fig.add_trace(go.Scattergl(x = data['datetime'], y = data['tag_{}'.format(macro_cat['geophony'][idx])], name=macro_cat['geophony'][idx]), row=1, col=1)
+    #     fig.add_trace(go.Scattergl(x = data['datetime'], y = data['tag_{}'.format(macro_cat['biophony'][idx])],  name=macro_cat['biophony'][idx]), row=2, col=1)
+    #     fig.add_trace(go.Scattergl(x = data['datetime'], y = data['tag_{}'.format(macro_cat['anthropophony'][idx])],  name=macro_cat['anthropophony'][idx]), row=3, col=1)
+    fig.add_trace(go.Scattergl(x = data['datetime'], y = data['anthropophony'],name='Anthropophonie', line = dict(color='black'), opacity=0.5), row=1, col=1)
+    fig.add_trace(go.Scattergl(x = data['datetime'], y = data['geophony'],name="Géophonie", line = dict(color='blue'), opacity=0.5), row=2, col=1)
+    fig.add_trace(go.Scattergl(x = data['datetime'], y = data['biophony'], name= 'Biophonie', line = dict(color='green'), opacity=0.5), row=3, col=1)
+    
+   
+    fig.update_layout(margin={"r":0,"t":50,"l":0,"b":0},coloraxis_colorbar=dict(
+        title="<b>Probabilité</b>",titleside='right',
+                        thicknessmode="pixels", thickness=30,
+                        lenmode="pixels", len=400,
+                        yanchor="bottom", y=0.0,
+                        xanchor="right", x=1.1
+                        ),yaxis = {'fixedrange': True}, height=800)
+    fig.update_yaxes({'fixedrange': True}, row=2, col=1)
+    fig.update_yaxes({'fixedrange': True}, row=3, col=1)
+    
+
+    return fig, data
 
 
 
