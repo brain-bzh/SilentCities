@@ -42,7 +42,7 @@ def metadata_generator(folder):
         Df_error = pd.read_pickle( save_name+'_error.pkl')
     else:
         Df = pd.DataFrame(columns=['filename', 'datetime', 'length', 'sr', 'dB'])
-        Df_error = pd.DataFrame(columns=['filename'])
+        Df_error = pd.DataFrame(columns=['filename','error'])
 
     filename_ = [Df['filename'][k] for k in range(len(Df))]
     [filename_.append(Df_error['filename'][k]) for k in range(len(Df_error))]
@@ -72,12 +72,14 @@ def metadata_generator(folder):
                     x = x*2**15
 
                 if len(x)>1:
-                    Df = pd.concat(Df,{'datetime': meta['datetime'], 'filename': os.path.basename(wavfile), 'length' : len(x), 'sr' : sr, 'dB' : 20*np.log10(np.std(x))}, ignore_index=True)
+                    Dfwav = pd.DataFrame.from_dict({'datetime': meta['datetime'], 'filename': os.path.basename(wavfile), 'length' : [len(x)], 'sr' : [sr], 'dB' : [20*np.log10(np.std(x))]})
+                    Df = pd.concat([Df,Dfwav], ignore_index=True)
                 else:
-                    Df_error = pd.concat(Df_error,{'filename': os.path.basename(wavfile)}, ignore_index=True)
+                    Df_error = pd.concat([Df_error,pd.DataFrame.from_dict({'filename': os.path.basename(wavfile), "error": "Empty wave file"})], ignore_index=True)
             except Exception as e:
-                try: 
-                    Df_error = pd.concat(Df_error,{'filename': os.path.basename(wavfile), "error": e}, ignore_index=True)
+                try:
+                    print(e) 
+                    Df_error = pd.concat([Df_error,pd.DataFrame({'filename': os.path.basename(wavfile), "error": e})], ignore_index=True)
                 except :
                     pass
             
