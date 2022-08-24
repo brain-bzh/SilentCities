@@ -91,10 +91,10 @@ def process_site(database, file_):
                     '09' : 0}
 
 
-        database['error'][partIDidx] = nb_error
-        database['nb_file'][partIDidx] = nb_file
-        database['sr'][partIDidx] = df['sr'].mean()
-        database['len'][partIDidx] = df['length'].mean() / database['sr'][partIDidx]
+        database.loc[partIDidx,'error'] = nb_error
+        database.loc[partIDidx,'nb_file'] = nb_file
+        database.loc[partIDidx,'sr'] = df['sr'].mean()
+        database.loc[partIDidx,'len'] = df['length'].mean() / database.loc[partIDidx,'sr']
 
         for idx, filename in enumerate(df['filename']):
             if idx == 0:
@@ -111,12 +111,12 @@ def process_site(database, file_):
                 ref_dB_file = df['filename'][idx]
                 ref_dB = df['dB'][idx]
 
-        database['min_dB'][partIDidx] = ref_dB
-        database['ref_file'][partIDidx] = ref_dB_file
+        database.loc[partIDidx,'min_dB'] = ref_dB
+        database.loc[partIDidx,'ref_file'] = ref_dB_file
         if error_date:
-            database['error_date'][partIDidx] = True
+            database.loc[partIDidx,'error_date'] = True
         for key in nb_month.keys():
-            database[month_cov[key]][partIDidx] =  nb_month[key]/nb_rec_month[key]*100
+            database.loc[partIDidx,month_cov[key]] =  nb_month[key]/nb_rec_month[key]*100
 
     print(file_)
     
