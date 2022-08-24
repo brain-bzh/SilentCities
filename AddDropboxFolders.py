@@ -8,21 +8,6 @@ from zipfile import ZipFile
 import os
 
 
-# testing the reading from a zip file and extracting just one file 
-
-# In[3]:
-
-
-z = ZipFile('/home/nfarrugi/bigdisk2/new/dropbox/SilentCitiesData/0069/0069_02.zip')
-filelist = z.namelist()
-
-
-# In[13]:
-
-
-filelist
-
-
 # Pipeline
 # --
 # 
@@ -41,10 +26,10 @@ filelist
 # In[5]:
 
 
-bigdisk1 = '/home/nfarrugi/bigdisk1'
-bigdisk2 = '/home/nfarrugi/bigdisk2'
+bigdisk1 = '/bigdisk1'
+bigdisk2 = '/bigdisk2'
 
-dropboxfolder = '/home/nfarrugi/bigdisk2/new/dropbox/SilentCitiesData/'
+dropboxfolder = '/bigdisk2/new/dropbox/SilentCitiesData/'
 
 
 # In[10]:
@@ -146,17 +131,21 @@ def extract_list_from_zip(zipfile,destdir,curfile):
     ### filelist is a subset (potentially all) from the list of files in zipfile
     ### If not, take the whole list of files from the zip
     os.makedirs(destdir,exist_ok=True)
-    z = ZipFile(zipfile)
-    # In case in the filelist there are paths
-    filenameonly = os.path.split(curfile)[1]
-    # extract a specific file from the zip container
-    curfile_ = [x for x in z.namelist() if curfile in x][0]
-    f = z.open(curfile_)
-    # save the extracted file 
-    content = f.read()
-    f = open(os.path.join(destdir,filenameonly), 'wb')
-    f.write(content)
-    f.close()
+    try:
+        z = ZipFile(zipfile)
+        # In case in the filelist there are paths
+        filenameonly = os.path.split(curfile)[1]
+        # extract a specific file from the zip container
+        curfile_ = [x for x in z.namelist() if curfile in x][0]
+        f = z.open(curfile_)
+        # save the extracted file 
+        content = f.read()
+        f = open(os.path.join(destdir,filenameonly), 'wb')
+        f.write(content)
+        f.close()
+    except Exception as e:
+        print(e)
+        print(f"File {zipfile} seems to be corrupted!")
 
 
 # In[211]:
@@ -170,7 +159,7 @@ for cursite in (bigdisk1sites):
     curfolder = os.path.join(dropboxfolder, cursite)
     tot,Dfdropbox = list_all_files_from_dir(curfolder)
     ## go find the CSV for this site 
-    Df = pd.read_csv(f'/home/nfarrugi/bigdisk2/meta_silentcities/site/{cursite}.csv')
+    Df = pd.read_csv(f'/bigdisk2/meta_silentcities/site/{cursite}.csv')
     df_ = Dfdropbox.join(Df[['filename','dB']].set_index('filename'),on='filename',how='left').copy()
     missing_df = df_[df_['dB'].isna()].copy()
     print(f"Site {cursite} : {len(Df)} files were already analyzed , {tot} files on dropbox, new {len(missing_df)} ")
@@ -187,7 +176,7 @@ for cursite in (bigdisk2sites):
     curfolder = os.path.join(dropboxfolder, cursite)
     tot,Dfdropbox = list_all_files_from_dir(curfolder)
     ## go find the CSV for this site 
-    Df = pd.read_csv(f'/home/nfarrugi/bigdisk2/meta_silentcities/site/{cursite}.csv')
+    Df = pd.read_csv(f'/bigdisk2/meta_silentcities/site/{cursite}.csv')
     df_ = Dfdropbox.join(Df[['filename','dB']].set_index('filename'),on='filename',how='left').copy()
     missing_df = df_[df_['dB'].isna()].copy()
     print(f"Site {cursite} : {len(Df)} files were already analyzed , {tot} files on dropbox, new {len(missing_df)} ")
