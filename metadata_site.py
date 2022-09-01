@@ -34,6 +34,8 @@ DATABASE['error'] = None
 DATABASE['nb_file'] = None
 DATABASE['sr'] = None
 DATABASE['len'] = None
+DATABASE['sr_median'] = None
+DATABASE['len_median'] = None
 DATABASE['min_dB'] = None
 DATABASE['ref_file'] = None
 DATABASE['error_date'] = False
@@ -95,6 +97,8 @@ def process_site(database, file_):
         database.loc[partIDidx,'nb_file'] = nb_file
         database.loc[partIDidx,'sr'] = df['sr'].mean()
         database.loc[partIDidx,'len'] = df['length'].mean() / database.loc[partIDidx,'sr']
+        database.loc[partIDidx,'sr_median'] = df['sr'].median()
+        database.loc[partIDidx,'len_median'] = df['length'].median() / database.loc[partIDidx,'sr_median']
 
         for idx, filename in enumerate(df['filename']):
             if idx == 0:
