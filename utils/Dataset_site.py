@@ -157,7 +157,7 @@ class Silent_dataset(Dataset):
         ecoac = compute_ecoacoustics(wav, self.sr_eco[0], Fmin = 100, Fmax=20000, refdB=self.ref_dB)
         if sr != self.sr_tagging:
             wav = resample(wav_o, int(len_audio_s*self.sr_tagging))
-        wav = torch.tensor(wav)
+        wav = torch.FloatTensor(wav)
 
         return (wav.view(int(len_audio_s*self.sr_tagging)), {'name': os.path.basename(filename), 'start': self.meta['start'][idx],
                                                         'date': self.meta['date'][idx].strftime('%Y%m%d_%H%M%S'), 
@@ -204,8 +204,9 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, dat
 
             for win in range(nb_win):
                 delta = datetime.timedelta(seconds=int((win*len_audio_s)))
-                meta_dataloader = meta_dataloader.append({'filename': filelist[filelist_base.index(wavfile)], 'sr': sr_in, 'start': (
-                    win*len_audio_s), 'stop': ((win+1)*len_audio_s), 'len': len_file, 'date': meta_site['datetime'][idx] + delta}, ignore_index=True)
+                curmeta = pd.DataFrame.from_dict({'filename': [filelist[filelist_base.index(wavfile)]], 'sr': [sr_in], 'start': (
+                    [win*len_audio_s]), 'stop': [((win+1)*len_audio_s)], 'len': [len_file], 'date': meta_site['datetime'][idx] + delta})
+                meta_dataloader = pd.concat([meta_dataloader,curmeta], ignore_index=True)
             # if duration % len_audio_s == float(0):
             #     delta = datetime.timedelta(seconds=int((nb_win-1)*len_audio_s))
             #     meta_dataloader = meta_dataloader.append({'filename': filelist[filelist_base.index(wavfile)], 'sr': sr_in, 'start': (
