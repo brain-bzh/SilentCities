@@ -108,7 +108,7 @@ def compute_ecoacoustics(wavforme, sr, Fmin, Fmax, refdB):
 
 
 class Silent_dataset(Dataset):
-    def __init__(self, meta_dataloader, sr_eco, sr_tagging,file_refdB,to_mp3=None):
+    def __init__(self, meta_dataloader, sr_eco, sr_tagging,file_refdB,to_mp3=None,preload=False):
         ref, sr_ = librosa.load(file_refdB, sr=None, mono=True)
         ref_filt = butter_bandpass_filter(ref, 5000, 20000, fs = sr_, order=9)
         self.ref_dB = (20*np.log10(np.std(ref)), 20*np.log10(np.std(ref_filt)))                  
@@ -118,11 +118,24 @@ class Silent_dataset(Dataset):
         self.to_mp3 = to_mp3 ### this must be the output site folder
         if not(to_mp3 is None):
             print(f"Temp folder for wav files for mp3 conversion : {defult_tmp_dir}")
+        self.preload = preload
+        self.data = []
+        if preload:
+            print('Preloading dataset...')
+            for idx,curfile in tqdm(enumerate(self.meta['filename'])):
+                filename = curfile
+
+                wav_o, sr = librosa.load(filename, sr=None, mono=True,offset=self.meta['start'][idx], duration=len_audio_s)
+                self.data.append((wav_o,sr))
+
 
     def __getitem__(self, idx):
         filename = self.meta['filename'][idx]
 
-        wav_o, sr = librosa.load(filename, sr=None, mono=True,
+        if self.preload:
+            wav_o,sr = self.data[idx]
+        else:
+            wav_o, sr = librosa.load(filename, sr=None, mono=True,
                               offset=self.meta['start'][idx], duration=len_audio_s)
         
         
@@ -167,7 +180,7 @@ class Silent_dataset(Dataset):
         return len(self.meta['filename'])
 
 
-def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, database ,sr_eco=[48000,44100],sr_tagging=32000, batch_size=6,mp3folder = None,ncpu=NUM_CORE):
+def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, database ,sr_eco=[48000,44100],sr_tagging=32000, batch_size=6,mp3folder = None,ncpu=NUM_CORE,preload=False):
     partIDidx = database[database.partID == int(site_ID)].index[0]
     file_refdB = database['ref_file'][partIDidx]
     if os.path.exists(os.path.join(meta_path, site_ID+'_metaloader.pkl')):
@@ -218,7 +231,7 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, dat
     print(meta_dataloader)
 
     site_set = Silent_dataset(meta_dataloader=meta_dataloader.reset_index(drop=True),
-     sr_eco=sr_eco,sr_tagging=sr_tagging, file_refdB=file_refdB,to_mp3=mp3folder)
+     sr_eco=sr_eco,sr_tagging=sr_tagging, file_refdB=file_refdB,to_mp3=mp3folder,preload=preload)
     site_set = torch.utils.data.DataLoader(
         site_set, batch_size=batch_size, shuffle=False, num_workers=ncpu)
 
