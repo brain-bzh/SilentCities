@@ -27,6 +27,8 @@ parser.add_argument('--database', default=None, type=str,
 
 parser.add_argument('--nocuda', action='store_false',
                     help='Do not use the GPU for acceleration')
+parser.add_argument('--preload', action='store_true',
+                    help='preload wave files into RAM')
 parser.add_argument('--ncpu',default=NUM_CORE-4,type=int,
                     help='Number of CPUs for parallelization')
 
@@ -82,7 +84,7 @@ else:
                     'POWERB_8k':[], 'POWERB_16k':[],
                     'clipwise_output':[], 'sorted_indexes' : [] ,'embedding' : []}
 site_set = dataset.get_dataloader_site(
-    args.site, args.folder, meta_site, df_site,args.metadata_folder,database = DATABASE, sr_eco=[48000,44100],sr_tagging=32000,batch_size=args.batch_size,mp3folder=mp3folder,ncpu=args.ncpu)
+    args.site, args.folder, meta_site, df_site,args.metadata_folder,database = DATABASE, sr_eco=[48000,44100],sr_tagging=32000,batch_size=args.batch_size,mp3folder=mp3folder,ncpu=args.ncpu,preload=args.preload)
 print('audio processing')
 print(f"Using CUDA : {args.nocuda}")
 
