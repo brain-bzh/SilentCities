@@ -27,6 +27,7 @@ from utils import OctaveBand
 
 from pydub import AudioSegment
 import soundfile as sf
+import torchaudio
 
 NUM_CORE = multiprocessing.cpu_count()
 print(f'Max CPU count on this machine: {NUM_CORE}')
@@ -167,10 +168,7 @@ class Silent_dataset(Dataset):
 
                 os.remove(temp_name)
         
-        ecoac = compute_ecoacoustics(wav, self.sr_eco[0], Fmin = 100, Fmax=20000, refdB=self.ref_dB)
-        if sr != self.sr_tagging:
-            wav = resample(wav_o, int(len_audio_s*self.sr_tagging))
-        wav = torch.FloatTensor(wav)
+        ecoac = compute_ecoacoustics(wav, self.sr_eco[0], Fmin = 100, Fmax=20000, refdB=self.ref_dB)        
 
         return (wav.view(int(len_audio_s*self.sr_tagging)), {'name': os.path.basename(filename), 'start': self.meta['start'][idx],
                                                         'date': self.meta['date'][idx].strftime('%Y%m%d_%H%M%S'), 
@@ -179,6 +177,50 @@ class Silent_dataset(Dataset):
     def __len__(self):
         return len(self.meta['filename'])
 
+class Silent_dataset_tagging(Dataset):
+    def __init__(self, meta_dataloader, sr_eco, sr_tagging,file_refdB,to_mp3=None,preload=False):
+        ref, sr_ = librosa.load(file_refdB, sr=None, mono=True)
+        ref_filt = butter_bandpass_filter(ref, 5000, 20000, fs = sr_, order=9)
+        self.ref_dB = (20*np.log10(np.std(ref)), 20*np.log10(np.std(ref_filt)))                  
+        self.sr_eco = sr_eco
+        self.sr_tagging = sr_tagging
+        self.meta = meta_dataloader
+        self.to_mp3 = to_mp3 ### this must be the output site folder
+        if not(to_mp3 is None):
+            print(f"Temp folder for wav files for mp3 conversion : {defult_tmp_dir}")
+        self.preload = preload
+        self.data = []
+        if preload:
+            print('Preloading dataset...')
+            for idx,curfile in tqdm(enumerate(self.meta['filename'])):
+                filename = curfile
+
+                wav_o, sr = librosa.load(filename, sr=None, mono=True,offset=self.meta['start'][idx], duration=len_audio_s)
+                
+                if sr != self.sr_tagging:
+                    wav = resample(wav_o, int(len_audio_s*self.sr_tagging))
+                wav = torch.FloatTensor(wav)
+
+                self.data.append(wav)
+
+    def __getitem__(self, idx):
+        filename = self.meta['filename'][idx]
+
+        if self.preload:
+            wav = self.data[idx]
+        else:
+            wav_o, sr = librosa.load(filename, sr=None, mono=True,
+                              offset=self.meta['start'][idx], duration=len_audio_s)
+
+            if sr != self.sr_tagging:
+                wav = resample(wav_o, int(len_audio_s*self.sr_tagging))
+            wav = torch.FloatTensor(wav)
+
+        return (wav.view(int(len_audio_s*self.sr_tagging)), {'name': os.path.basename(filename), 'start': self.meta['start'][idx],
+                                                        'date': self.meta['date'][idx].strftime('%Y%m%d_%H%M%S')})
+
+    def __len__(self):
+        return len(self.meta['filename'])
 
 def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, database ,sr_eco=[48000,44100],sr_tagging=32000, batch_size=6,mp3folder = None,ncpu=NUM_CORE,preload=False):
     partIDidx = database[database.partID == int(site_ID)].index[0]
@@ -234,8 +276,13 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, dat
      sr_eco=sr_eco,sr_tagging=sr_tagging, file_refdB=file_refdB,to_mp3=mp3folder,preload=preload)
     site_set = torch.utils.data.DataLoader(
         site_set, batch_size=batch_size, shuffle=False, num_workers=ncpu)
+    
+    site_set_tagging = Silent_dataset_tagging(meta_dataloader=meta_dataloader.reset_index(drop=True),
+     sr_eco=sr_eco,sr_tagging=sr_tagging, file_refdB=file_refdB,to_mp3=mp3folder,preload=preload)
+    site_set_tagging = torch.utils.data.DataLoader(
+        site_set_tagging, batch_size=batch_size, shuffle=False, num_workers=ncpu)
 
-    return site_set
+    return site_set,site_set_tagging
 
 if __name__ == '__main__':
 

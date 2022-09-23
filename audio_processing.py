@@ -5,7 +5,7 @@ import multiprocessing
 import pandas as pd
 import argparse
 from tqdm import tqdm
-from audioset_tagging_cnn.inference import audio_tagging
+from audioset_tagging_cnn.inference import audio_tagging,prepare_model
 import utils.Dataset_site as dataset
 import utils.utils
 from analysis.tagging_validation import tagging_validate
@@ -83,16 +83,21 @@ else:
                     'POWERB_1k':[], 'POWERB_2k':[], 'POWERB_4k':[], 
                     'POWERB_8k':[], 'POWERB_16k':[],
                     'clipwise_output':[], 'sorted_indexes' : [] ,'embedding' : []}
-site_set = dataset.get_dataloader_site(
+site_set,site_set_tagging = dataset.get_dataloader_site(
     args.site, args.folder, meta_site, df_site,args.metadata_folder,database = DATABASE, sr_eco=[48000,44100],sr_tagging=32000,batch_size=args.batch_size,mp3folder=mp3folder,ncpu=args.ncpu,preload=args.preload)
 print('audio processing')
 print(f"Using CUDA : {args.nocuda}")
+device = torch.device('cuda') if (args.nocuda) and torch.cuda.is_available() else torch.device('cpu')
 
-for batch_idx, (inputs, info) in enumerate(tqdm(site_set)):
+print("Prepare model...")
+model = prepare_model(checkpoint_path , usecuda=args.nocuda,model_type="ResNet22")
+
+print("Audio Tagging...")
+for batch_idx, (inputs, info) in enumerate(tqdm(site_set_tagging)):
 
     with torch.no_grad():
-
-        clipwise_output, labels, sorted_indexes, embedding = audio_tagging(inputs, checkpoint_path , usecuda=args.nocuda)
+        inputs = inputs.to(device)
+        clipwise_output, labels, sorted_indexes, embedding = audio_tagging(inputs, model)
     
     for idx, date_ in enumerate(info['date']):
         df_site['clipwise_output'].append(clipwise_output[idx])
@@ -101,14 +106,11 @@ for batch_idx, (inputs, info) in enumerate(tqdm(site_set)):
         df_site['datetime'].append(str(date_)) 
         df_site['name'].append(str(info['name'][idx]))
         df_site['start'].append(float(info['start'][idx]))
-        for key in info['ecoac'].keys():
-            df_site[key].append(float(info['ecoac'][key].numpy()[idx])) 
-    
     
     if batch_idx%100 == 0:
         utils.utils.save_obj(df_site, audio_process_name)
 
-## Saving the pkl with all the processed data : Tagging probas, embeddings, and ecoacoustic indices (named xxxx_process.pkl)
+## Saving the pkl with all the tagging
 utils.utils.save_obj(df_site, audio_process_name)
 
 ## Generating the Dataframe with the subset of tagging categories as well as Geophony, Anthropophony and Biophony
@@ -116,14 +118,27 @@ utils.utils.save_obj(df_site, audio_process_name)
 Df_tagging = tagging_validate(df_site)
 
 ## Dataframe with only ecoacoustic indices and important metadata 
-Df_eco = pd.DataFrame()
-Df_eco['name'] = df_site['name']
-Df_eco['start'] = df_site['start']
-Df_eco['datetime'] = df_site['datetime']
-for key in info['ecoac'].keys():
-    Df_eco[key] = df_site[key]
+Df_eco = {'name':[],'start':[], 'datetime': [], 'dB': [], 'ndsi_N': [], 'aci_N': [],
+                    'BI_N': [], 'EAS_N': [],
+                    'ECV_N': [], 'EPS_N': [] ,'ndsi_W': [], 'aci_W': [],
+                    'BI_W': [], 'EAS_W': [],
+                    'ECV_W': [], 'EPS_W': [], 'ACT':[],
+                    'POWERB_126':[], 'POWERB_251':[], 'POWERB_501':[], 
+                    'POWERB_1k':[], 'POWERB_2k':[], 'POWERB_4k':[], 
+                    'POWERB_8k':[], 'POWERB_16k':[]}
+
+
+print("Eco acoustic indices and MP3 conversion...")
+for batch_idx, (inputs, info) in enumerate(tqdm(site_set)):
+
+    for idx, date_ in enumerate(info['date']):        
+        Df_eco['datetime'].append(str(date_)) 
+        Df_eco['name'].append(str(info['name'][idx]))
+        Df_eco['start'].append(float(info['start'][idx]))
+        for key in info['ecoac'].keys():
+            Df_eco[key].append(float(info['ecoac'][key].numpy()[idx])) 
 
 ## Fusing with the dataframe containing only the ecoacoustic indices 
 
-Df_final = pd.merge(Df_tagging,Df_eco,on=['name','start','datetime'])
+Df_final = pd.merge(Df_tagging,pd.DataFrame.from_dict(Df_eco),on=['name','start','datetime'])
 Df_final.sort_values(by=['datetime','start']).to_csv(csvfile,index=False)
