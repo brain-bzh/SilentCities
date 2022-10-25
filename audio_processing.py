@@ -129,7 +129,7 @@ Df_eco = {'name':[],'start':[], 'datetime': [], 'dB': [], 'ndsi_N': [], 'aci_N':
 
 
 print("Eco acoustic indices and MP3 conversion...")
-for batch_idx, (inputs, info) in enumerate(tqdm(site_set)):
+for batch_idx, info in enumerate(tqdm(site_set)):
 
     for idx, date_ in enumerate(info['date']):        
         Df_eco['datetime'].append(str(date_)) 

@@ -170,7 +170,7 @@ class Silent_dataset(Dataset):
         
         ecoac = compute_ecoacoustics(wav, self.sr_eco[0], Fmin = 100, Fmax=20000, refdB=self.ref_dB)        
 
-        return (wav.view(int(len_audio_s*self.sr_tagging)), {'name': os.path.basename(filename), 'start': self.meta['start'][idx],
+        return {'name': os.path.basename(filename), 'start': self.meta['start'][idx],
                                                         'date': self.meta['date'][idx].strftime('%Y%m%d_%H%M%S'), 
                                                         'ecoac': ecoac })
 
