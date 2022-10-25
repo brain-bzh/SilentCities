@@ -172,7 +172,7 @@ class Silent_dataset(Dataset):
 
         return {'name': os.path.basename(filename), 'start': self.meta['start'][idx],
                                                         'date': self.meta['date'][idx].strftime('%Y%m%d_%H%M%S'), 
-                                                        'ecoac': ecoac })
+                                                        'ecoac': ecoac }
 
     def __len__(self):
         return len(self.meta['filename'])
