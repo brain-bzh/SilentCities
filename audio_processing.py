@@ -84,35 +84,39 @@ else:
                     'POWERB_8k':[], 'POWERB_16k':[],
                     'clipwise_output':[], 'sorted_indexes' : [] ,'embedding' : []}
 site_set,site_set_tagging = dataset.get_dataloader_site(
-    args.site, args.folder, meta_site, df_site,args.metadata_folder,database = DATABASE, sr_eco=[48000,44100],sr_tagging=32000,batch_size=args.batch_size,mp3folder=mp3folder,ncpu=args.ncpu,preload=args.preload)
+    args.site, args.folder, meta_site, df_site,args.metadata_folder,database = DATABASE, sr_eco=[48000,44100],sr_tagging=32000,batch_size=args.batch_size,mp3folder=mp3folder,ncpu=args.ncpu,preload=args.preload,rerun=True)
 print('audio processing')
-print(f"Using CUDA : {args.nocuda}")
-device = torch.device('cuda') if (args.nocuda) and torch.cuda.is_available() else torch.device('cpu')
 
-print("Prepare model...")
-model = prepare_model(checkpoint_path , usecuda=args.nocuda,model_type="ResNet22")
+dotagging = True
+if dotagging:
+    print(f"Using CUDA : {args.nocuda}")
+    device = torch.device('cuda') if (args.nocuda) and torch.cuda.is_available() else torch.device('cpu')
 
-print("Audio Tagging...")
-for batch_idx, (inputs, info) in enumerate(tqdm(site_set_tagging)):
+    print("Prepare model...")
+    model = prepare_model(checkpoint_path , usecuda=args.nocuda,model_type="ResNet22")
 
-    with torch.no_grad():
-        inputs = inputs.to(device)
-        clipwise_output, labels, sorted_indexes, embedding = audio_tagging(inputs, model)
-    
-    for idx, date_ in enumerate(info['date']):
-        df_site['clipwise_output'].append(clipwise_output[idx])
-        df_site['sorted_indexes'].append(sorted_indexes[idx])
-        df_site['embedding'].append(embedding[idx])
-        df_site['datetime'].append(str(date_)) 
-        df_site['name'].append(str(info['name'][idx]))
-        df_site['start'].append(float(info['start'][idx]))
-    
-    if batch_idx%100 == 0:
-        utils.utils.save_obj(df_site, audio_process_name)
+    print("Audio Tagging...")
+    for batch_idx, (inputs, info) in enumerate(tqdm(site_set_tagging)):
 
-## Saving the pkl with all the tagging
-utils.utils.save_obj(df_site, audio_process_name)
+        with torch.no_grad():
+            inputs = inputs.to(device)
+            clipwise_output, labels, sorted_indexes, embedding = audio_tagging(inputs, model)
+        
+        for idx, date_ in enumerate(info['date']):
+            df_site['clipwise_output'].append(clipwise_output[idx])
+            df_site['sorted_indexes'].append(sorted_indexes[idx])
+            df_site['embedding'].append(embedding[idx])
+            df_site['datetime'].append(str(date_)) 
+            df_site['name'].append(str(info['name'][idx]))
+            df_site['start'].append(float(info['start'][idx]))
+        
+        if batch_idx%100 == 0:
+            utils.utils.save_obj(df_site, audio_process_name)
 
+    ## Saving the pkl with all the tagging
+    utils.utils.save_obj(df_site, audio_process_name)
+else:
+    print("Skipping tagging - has results been loaded ? ")
 ## Generating the Dataframe with the subset of tagging categories as well as Geophony, Anthropophony and Biophony
 
 Df_tagging = tagging_validate(df_site)
