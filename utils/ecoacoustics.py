@@ -54,7 +54,7 @@ def compute_NDSI(wave,sr, windowLength = 1024, anthrophony=[1000,2000], biophony
 
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------
-def compute_spectrogram(sig,sr, windowLength=512, windowHop= 256, square=True, windowType='hanning', centered=False, normalized = False ):
+def compute_spectrogram(sig,sr, windowLength=512, windowHop= 256, square=True, windowType='hann', centered=False, normalized = False ):
     """
     Compute a spectrogram of an audio signal.
     Return a list of list of values as the spectrogram, and a list of frequencies.

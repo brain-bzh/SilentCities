@@ -195,10 +195,11 @@ class Silent_dataset_tagging(Dataset):
             for idx,curfile in tqdm(enumerate(self.meta['filename'])):
                 filename = curfile
 
-                wav_o, sr = librosa.load(filename, sr=None, mono=True,offset=self.meta['start'][idx], duration=len_audio_s)
+                wav, sr = librosa.load(filename, sr=None, mono=True,offset=self.meta['start'][idx], duration=len_audio_s)
                 
                 if sr != self.sr_tagging:
-                    wav = resample(wav_o, int(len_audio_s*self.sr_tagging))
+                    wav = resample(wav, int(len_audio_s*self.sr_tagging))
+                
                 wav = torch.FloatTensor(wav)
 
                 self.data.append(wav)
@@ -209,11 +210,11 @@ class Silent_dataset_tagging(Dataset):
         if self.preload:
             wav = self.data[idx]
         else:
-            wav_o, sr = librosa.load(filename, sr=None, mono=True,
+            wav, sr = librosa.load(filename, sr=None, mono=True,
                               offset=self.meta['start'][idx], duration=len_audio_s)
 
             if sr != self.sr_tagging:
-                wav = resample(wav_o, int(len_audio_s*self.sr_tagging))
+                wav = resample(wav, int(len_audio_s*self.sr_tagging))
             wav = torch.FloatTensor(wav)
 
         return (wav.view(int(len_audio_s*self.sr_tagging)), {'name': os.path.basename(filename), 'start': self.meta['start'][idx],
@@ -222,13 +223,14 @@ class Silent_dataset_tagging(Dataset):
     def __len__(self):
         return len(self.meta['filename'])
 
-def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, database ,sr_eco=[48000,44100],sr_tagging=32000, batch_size=6,mp3folder = None,ncpu=NUM_CORE,preload=False):
+def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, database ,sr_eco=[48000,44100],sr_tagging=32000, batch_size=6,mp3folder = None,ncpu=NUM_CORE,preload=False,rerun=False):
     partIDidx = database[database.partID == int(site_ID)].index[0]
     file_refdB = database['ref_file'][partIDidx]
     if os.path.exists(os.path.join(meta_path, site_ID+'_metaloader.pkl')):
         meta_dataloader = pd.read_pickle(os.path.join(meta_path, site_ID+'_metaloader.pkl'))
         N = len(df_site['datetime'])
-        meta_dataloader = meta_dataloader[N:]
+        if not(rerun):
+            meta_dataloader = meta_dataloader[N:]
         for root, dirs, files in os.walk(path_wavfile, topdown=False):
             for name in files:
                 if name[-3:].casefold() == 'wav' and name[:2] != '._':
@@ -275,7 +277,7 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, dat
     site_set = Silent_dataset(meta_dataloader=meta_dataloader.reset_index(drop=True),
      sr_eco=sr_eco,sr_tagging=sr_tagging, file_refdB=file_refdB,to_mp3=mp3folder,preload=preload)
     site_set = torch.utils.data.DataLoader(
-        site_set, batch_size=batch_size, shuffle=False, num_workers=ncpu)
+        site_set, batch_size=1, shuffle=False, num_workers=ncpu)
     
     site_set_tagging = Silent_dataset_tagging(meta_dataloader=meta_dataloader.reset_index(drop=True),
      sr_eco=sr_eco,sr_tagging=sr_tagging, file_refdB=file_refdB,to_mp3=mp3folder,preload=preload)

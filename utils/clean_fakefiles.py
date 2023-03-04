@@ -39,8 +39,9 @@ from tqdm import tqdm
 
 print(f"Found {len(filestodelete)} empty files")
 
-for curfiletodel in tqdm(filestodelete):
-    try:
-        os.remove(curfiletodel)
-    except:
-        pass
+#if False:
+	#for curfiletodel in tqdm(filestodelete):
+	#	try:
+	#		os.remove(curfiletodel)
+	#	except:
+	#		pass
