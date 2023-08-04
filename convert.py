@@ -25,6 +25,8 @@ parser.add_argument('--length', default=10, type=int, help='Segment length')
 parser.add_argument('--batch_size', default=32, type=int, help='batch size')
 parser.add_argument('--metadata_folder', default=None,
                     type=str, help='folder with all metadata')
+parser.add_argument('--results_folder', default=None,
+                    type=str, help='folder with acoustic measurements files with speech')
 parser.add_argument('--site', default=None, type=str, help='site to process')
 parser.add_argument('--folder', default=None, type=str,
                     help='Path to folder with wavefiles, will walk through subfolders')
@@ -70,9 +72,9 @@ class Convert_Dataset(Dataset):
         else:
             wav_o, sr = librosa.load(filename, sr=None, mono=True,
                               offset=self.meta['start'][idx], duration=len_audio_s)        
-        
-        ## name of the mp3 file
-        flacfile = os.path.join(self.toflac,f"{os.path.splitext(os.path.split(filename)[1])[0]}_{self.meta['start'][idx]}.flac")
+        curdate = self.meta['date'][idx].strftime('%Y%m%d_%H%M%S')
+        ## name of the flac file
+        flacfile = self.meta['flacfile'][idx]
         #print(flacfile)
         if not(os.path.isfile(flacfile)):
             #print(f"Converting {flacfile}...")                
@@ -91,20 +93,13 @@ class Convert_Dataset(Dataset):
         
         
         return {'name': os.path.basename(filename), 'start': self.meta['start'][idx],
-                                                        'date': self.meta['date'][idx].strftime('%Y%m%d_%H%M%S')}
+                                                        'date': curdate}
 
     def __len__(self):
         return len(self.meta['filename'])
     
-
-
-
-def get_dataloader_site(site_ID, path_wavfile, meta_site, meta_path, database, batch_size=6,flacfolder = None,ncpu=NUM_CORE,preload=False):
+def get_dataloader_site_fromresults(site_ID, path_wavfile, results_path, meta_path,meta_site, database, batch_size=6,flacfolder = None,ncpu=NUM_CORE,preload=False):
     partIDidx = database[database.partID == int(site_ID)].index[0]
-    file_refdB = database['ref_file'][partIDidx]
-
-    meta_dataloader = pd.DataFrame(
-        columns=['filename', 'sr', 'start', 'stop'])
 
     filelist = []
     for root, dirs, files in os.walk(path_wavfile, topdown=False):
@@ -114,10 +109,24 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, meta_path, database, b
     
     filelist_base = [os.path.basename(file_) for file_ in filelist]
 
+    resultsfile = pd.read_csv(os.path.join(results_path,f"partID{args.site[1:]}.csv"))
+    speechfiles = resultsfile.loc[resultsfile['reject_speech'] == 1,'name'].to_list()
+
+    print(f"Found {len(np.unique(speechfiles))} speech files in results file")
+
+    #remove files in filelist that are in speechfiles
+    filelist_base = [file_ for file_ in filelist_base if file_ not in speechfiles]
+
+    meta_dataloader = pd.DataFrame(
+        columns=['filename', 'sr', 'start', 'stop'])
+    
     for idx, wavfile in enumerate(tqdm(meta_site['filename'])):
 
         len_file = meta_site['length'][idx]
         sr_in = meta_site['sr'][idx]
+        if wavfile in speechfiles:
+            print(f"Speech file {wavfile} rejected")
+            continue
 
         duration = len_file/sr_in
 
@@ -125,15 +134,31 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, meta_path, database, b
 
         for win in range(nb_win):
             delta = datetime.timedelta(seconds=int((win*len_audio_s)))
+            datevalue = meta_site['datetime'][idx] + delta
+            datestring = datevalue.strftime('%Y%m%d_%H%M%S')
+            filename_flac = "partID" + args.site[1:]+'-'+datestring+'.flac'
+            resultsfile.loc[resultsfile['datetime'] == datestring, 'filename_short'] = filename_flac
             curmeta = pd.DataFrame.from_dict({'filename': [filelist[filelist_base.index(wavfile)]], 'sr': [sr_in], 'start': (
-                [win*len_audio_s]), 'stop': [((win+1)*len_audio_s)], 'len': [len_file], 'date': meta_site['datetime'][idx] + delta})
-            meta_dataloader = pd.concat([meta_dataloader,curmeta], ignore_index=True)
+                [win*len_audio_s]), 'stop': [((win+1)*len_audio_s)], 'len': [len_file], 'date': datevalue, 'flacfile':filename_flac})
+            meta_dataloader = pd.concat([meta_dataloader,curmeta], ignore_index=True)                
         
-        if wavfile == file_refdB:
-            file_refdB = filelist[filelist_base.index(wavfile)]
-        
-    meta_dataloader.to_pickle(os.path.join(meta_path, site_ID+'_metaloader.pkl'))
+    meta_dataloader.to_pickle(os.path.join(meta_path, site_ID+'_metaloader_speechrejected.pkl'))
     print(meta_dataloader)
+    # rename the "name" column into "original_filename"
+    resultsfile = resultsfile.rename(columns={'name':'original_filename'})
+    #rename the filename_short column of resultsfiles into name
+    resultsfile = resultsfile.rename(columns={'filename_short':'name'})
+    #change the order of columns put the name column first 
+    cols = resultsfile.columns.tolist()
+    cols = cols[-1:] + cols[:-1]
+    resultsfile = resultsfile[cols]
+    # drop the lines corresponding to reject_speech == 1
+    resultsfile = resultsfile.loc[resultsfile['reject_speech'] == 0]
+    # drop the reject_speech column
+    resultsfile = resultsfile.drop(columns=['reject_speech','start'])
+    # save the resultsfile, compressed
+    resultsfile.to_csv(os.path.join(flacfolder,f"partID{args.site[1:]}.csv.gz"),index=False,compression='gzip')
+    
 
     site_set = Convert_Dataset(meta_dataloader=meta_dataloader.reset_index(drop=True),
     toflac=flacfolder,preload=preload)
@@ -152,7 +177,7 @@ if args.site is None:
 flacfolder = args.toflac
 if not(flacfolder is None):
     print("Will convert to FLAC...")
-    flacfolder = os.path.join(args.toflac,args.site)
+    flacfolder = os.path.join(args.toflac,args.site,'flac')
     print(f"Creating folder {flacfolder}")
     os.makedirs(flacfolder,exist_ok=True)
 
@@ -169,8 +194,11 @@ meta_site = pd.read_pickle(os.path.join(
     args.metadata_folder, args.site+'.pkl')).reset_index(drop=True)
 
 #(site_ID, path_wavfile, meta_site, meta_path, database, batch_size=6,flacfolder = None,ncpu=NUM_CORE,preload=False)
-site_set = get_dataloader_site(
-    site_ID=args.site, path_wavfile=args.folder, meta_site=meta_site,meta_path=args.metadata_folder,database = DATABASE,batch_size=args.batch_size,flacfolder=flacfolder,ncpu=args.ncpu,preload=args.preload)
+#site_set = get_dataloader_site(
+#    site_ID=args.site, path_wavfile=args.folder, meta_site=meta_site,meta_path=args.metadata_folder,database = DATABASE,batch_size=args.batch_size,flacfolder=flacfolder,ncpu=args.ncpu,preload=args.preload)
+
+site_set = get_dataloader_site_fromresults(
+    site_ID=args.site, path_wavfile=args.folder, results_path=args.results_folder,meta_site=meta_site,meta_path=args.metadata_folder,database = DATABASE,batch_size=args.batch_size,flacfolder=flacfolder,ncpu=args.ncpu,preload=args.preload)
 
 print("FLAC conversion...")
 
