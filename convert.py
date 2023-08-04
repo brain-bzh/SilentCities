@@ -15,6 +15,9 @@ import tempfile
 from torch.utils.data import Dataset
 from pydub import AudioSegment
 import soundfile as sf
+import shutil
+import tarfile
+import glob
 #python convert.py --metadata_folder /bigdisk1/meta_silentcities/dbfiles --site 0065 --folder /bigdisk2/silentcities/0065/ --database /bigdisk1/database_pross.pkl --batch_size 16 --toflac /bigdisk1/flac
 defult_tmp_dir = tempfile._get_default_tempdir()
 #### a comment 
@@ -74,7 +77,7 @@ class Convert_Dataset(Dataset):
                               offset=self.meta['start'][idx], duration=len_audio_s)        
         curdate = self.meta['date'][idx].strftime('%Y%m%d_%H%M%S')
         ## name of the flac file
-        flacfile = self.meta['flacfile'][idx]
+        flacfile = os.path.join(self.toflac,self.meta['flacfile'][idx])
         #print(flacfile)
         if not(os.path.isfile(flacfile)):
             #print(f"Converting {flacfile}...")                
@@ -157,7 +160,8 @@ def get_dataloader_site_fromresults(site_ID, path_wavfile, results_path, meta_pa
     # drop the reject_speech column
     resultsfile = resultsfile.drop(columns=['reject_speech','start'])
     # save the resultsfile, compressed
-    resultsfile.to_csv(os.path.join(flacfolder,f"partID{args.site[1:]}.csv.gz"),index=False,compression='gzip')
+    print(f"Saving results file to {os.path.join(args.toflac,args.site,f'partID{args.site[1:]}.csv.gz')}")
+    resultsfile.to_csv(os.path.join(args.toflac,args.site,f"partID{args.site[1:]}.csv.gz"),index=False,compression='gzip')
     
 
     site_set = Convert_Dataset(meta_dataloader=meta_dataloader.reset_index(drop=True),
@@ -207,4 +211,40 @@ for batch_idx, info in enumerate(tqdm(site_set)):
 
     pass
 
-print("Done !")
+print("Flac conversion Done !")
+
+
+# create gz archive with files from the flacfolder with flac files, so that each archive is not larger than 4GB
+# create a folder for the archives
+filesperarchive = 10000
+archive_folder = os.path.join(args.toflac,args.site[1:],'audio')
+print(f"Creating folder {archive_folder}")
+os.makedirs(archive_folder,exist_ok=True)
+# get the list of flac files
+flac_files = glob.glob(os.path.join(flacfolder,'*.flac'))
+# get the number of files
+nb_files = len(flac_files)
+# get the number of archives
+nb_archives = int(nb_files/filesperarchive) + 1
+
+print(f"There is a total of {nb_files} FLAC files to compress. I will do {nb_archives} archives, each with {filesperarchive} files")
+# create the archives
+ndigits = len(str(nb_archives))
+for idx in range(nb_archives):
+    # get the list of files to be archived
+    files_to_archive = flac_files[idx*filesperarchive:(idx+1)*filesperarchive]
+    # create the name of the archive
+    archive_name = os.path.join(archive_folder,f"partID{args.site[1:]}_{str(idx+1).zfill(ndigits)}.tar.gz")
+    # create the archive
+    with tarfile.open(archive_name, "w:gz") as tar:
+        for file_ in files_to_archive:
+            tar.add(file_, arcname=os.path.basename(file_))
+    # remove the files
+    for file_ in files_to_archive:
+        os.remove(file_)
+
+print('Removing flac folder')
+# remove the flac folder
+os.rmdir(flacfolder)
+
+print('Finished !')
