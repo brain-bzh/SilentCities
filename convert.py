@@ -69,6 +69,7 @@ if not(os.path.isdir('/bigdisk1')):
     args.metadata_folder = args.metadata_folder.replace('/bigdisk1','/users/local/bigdisk1')
     args.toflac = args.metadata_folder.replace('/bigdisk1','/users/local/bigdisk1')
     args.database = args.database.replace('/bigdisk1','/users/local/bigdisk1')
+    args.results_folder = args.results_folder.replace('/bigdisk1','/users/local/bigdisk1')
     print("replaced the bigdisk1 path with /users/local/bigdisk1")
 
 
