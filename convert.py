@@ -18,6 +18,12 @@ import soundfile as sf
 import shutil
 import tarfile
 import glob
+import datetime
+
+#start of timer 
+start_time = datetime.datetime.now()
+
+
 #python convert.py --metadata_folder /bigdisk1/meta_silentcities/dbfiles --site 0065 --database /bigdisk1/database_pross.pkl --batch_size 16 --toflac /bigdisk1/flac
 defult_tmp_dir = tempfile._get_default_tempdir()
 #### a comment 
@@ -273,5 +279,9 @@ os.makedirs(destdir,exist_ok=True)
 
 # copy the whole sitefolder to destdir
 shutil.copytree(sitefolder,destdir)
+
+# time elapsed
+elapsed = time.time() - start_time
+print(f"Time elapsed: {elapsed:.2f} s for {nb_files} files")
 
 print('Finished !')
