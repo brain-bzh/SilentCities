@@ -53,7 +53,7 @@ if os.path.isdir(os.path.join('/bigdisk1/silentcities',args.site)):
 elif os.path.isdir(os.path.join('/bigdisk2/silentcities',args.site)):
     sitefolder = os.path.join('/bigdisk2/silentcities',args.site)
     print(f"Data for site {args.site} found in /bigdisk2 ")
-eldif os.path.isdir(os.path.join('/users/local/bigdisk1/silentcities',args.site)):
+elif os.path.isdir(os.path.join('/users/local/bigdisk1/silentcities',args.site)):
     sitefolder = os.path.join('/users/local/bigdisk1/silentcities',args.site)
     print(f"Data for site {args.site} found in /users/local/bigdisk1 ")
 elif os.path.isdir(os.path.join('/users/local/bigdisk2/silentcities',args.site)):
@@ -249,7 +249,7 @@ nb_archives = int(nb_files/filesperarchive) + 1
 print(f"There is a total of {nb_files} FLAC files to compress. I will do {nb_archives} archives, each with {filesperarchive} files")
 # create the archives
 ndigits = len(str(nb_archives))
-for idx in range(nb_archives):
+for idx in tqdm(range(nb_archives)):
     # get the list of files to be archived
     files_to_archive = flac_files[idx*filesperarchive:(idx+1)*filesperarchive]
     # create the name of the archive
