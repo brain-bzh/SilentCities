@@ -18,7 +18,7 @@ import soundfile as sf
 import shutil
 import tarfile
 import glob
-#python convert.py --metadata_folder /bigdisk1/meta_silentcities/dbfiles --site 0065 --folder /bigdisk2/silentcities/0065/ --database /bigdisk1/database_pross.pkl --batch_size 16 --toflac /bigdisk1/flac
+#python convert.py --metadata_folder /bigdisk1/meta_silentcities/dbfiles --site 0065 --database /bigdisk1/database_pross.pkl --batch_size 16 --toflac /bigdisk1/flac
 defult_tmp_dir = tempfile._get_default_tempdir()
 #### a comment 
 NUM_CORE = multiprocessing.cpu_count()
@@ -31,8 +31,6 @@ parser.add_argument('--metadata_folder', default=None,
 parser.add_argument('--results_folder', default=None,
                     type=str, help='folder with acoustic measurements files with speech')
 parser.add_argument('--site', default=None, type=str, help='site to process')
-parser.add_argument('--folder', default=None, type=str,
-                    help='Path to folder with wavefiles, will walk through subfolders')
 parser.add_argument('--toflac', default=None, type=str,
                     help='Path to folder for FLAC conversion, (Default : no conversion). Will create a subfolder with site name')
 parser.add_argument('--database', default=None, type=str,
@@ -44,8 +42,34 @@ parser.add_argument('--preload', action='store_true',
                     help='preload wave files into RAM')
 parser.add_argument('--ncpu',default=NUM_CORE-1,type=int,
                     help='Number of CPUs for parallelization')
-
+parser.add_argument('--destdir', default='/nasbrain/datasets/silentcities', type=str,
+                    help='Path to destination folder')
 args = parser.parse_args()
+
+## find the path to the data using the site name 
+if os.path.isdir(os.path.join('/bigdisk1/silentcities',args.site)):
+    sitefolder = os.path.join('/bigdisk1/silentcities',args.site)
+    print(f"Data for site {args.site} found in /bigdisk1 ")
+elif os.path.isdir(os.path.join('/bigdisk2/silentcities',args.site)):
+    sitefolder = os.path.join('/bigdisk2/silentcities',args.site)
+    print(f"Data for site {args.site} found in /bigdisk2 ")
+eldif os.path.isdir(os.path.join('/users/local/bigdisk1/silentcities',args.site)):
+    sitefolder = os.path.join('/users/local/bigdisk1/silentcities',args.site)
+    print(f"Data for site {args.site} found in /users/local/bigdisk1 ")
+elif os.path.isdir(os.path.join('/users/local/bigdisk2/silentcities',args.site)):
+    sitefolder = os.path.join('/users/local/bigdisk2/silentcities',args.site)
+    print(f"Data for site {args.site} found in /users/local/bigdisk2 ")
+else:
+    raise ValueError(f"Data for site {args.site} not found either in /bigdisk1 or /bigdisk2")
+
+
+## Use the relative path to /bigdisk if it's not mounted
+
+if not(os.path.isdir('/bigdisk1')):
+    args.metadata_folder = args.metadata_folder.replace('/bigdisk1','/users/local/bigdisk1')
+    args.toflac = args.metadata_folder.replace('/bigdisk1','/users/local/bigdisk1')
+    args.database = args.database.replace('/bigdisk1','/users/local/bigdisk1')
+    print("replaced the bigdisk1 path with /users/local/bigdisk1")
 
 
 ## utility functions
@@ -160,8 +184,8 @@ def get_dataloader_site_fromresults(site_ID, path_wavfile, results_path, meta_pa
     # drop the reject_speech column
     resultsfile = resultsfile.drop(columns=['reject_speech','start'])
     # save the resultsfile, compressed
-    print(f"Saving results file to {os.path.join(args.toflac,args.site,f'partID{args.site[1:]}.csv.gz')}")
-    resultsfile.to_csv(os.path.join(args.toflac,args.site,f"partID{args.site[1:]}.csv.gz"),index=False,compression='gzip')
+    print(f"Saving results file to {os.path.join(args.toflac,args.site[1:],f'partID{args.site[1:]}.csv.gz')}")
+    resultsfile.to_csv(os.path.join(args.toflac,args.site[1:],f"partID{args.site[1:]}.csv.gz"),index=False,compression='gzip')
     
 
     site_set = Convert_Dataset(meta_dataloader=meta_dataloader.reset_index(drop=True),
@@ -171,8 +195,6 @@ def get_dataloader_site_fromresults(site_ID, path_wavfile, results_path, meta_pa
 
     return site_set
 
-if args.folder is None:
-    raise(AttributeError("Must provide either a file or a folder"))
 if args.metadata_folder is None:
     raise(AttributeError("Must provide metadata folder"))
 if args.site is None:
@@ -181,7 +203,7 @@ if args.site is None:
 flacfolder = args.toflac
 if not(flacfolder is None):
     print("Will convert to FLAC...")
-    flacfolder = os.path.join(args.toflac,args.site,'flac')
+    flacfolder = os.path.join(flacfolder,args.site[1:],'flac')
     print(f"Creating folder {flacfolder}")
     os.makedirs(flacfolder,exist_ok=True)
 
@@ -197,12 +219,8 @@ except:
 meta_site = pd.read_pickle(os.path.join(
     args.metadata_folder, args.site+'.pkl')).reset_index(drop=True)
 
-#(site_ID, path_wavfile, meta_site, meta_path, database, batch_size=6,flacfolder = None,ncpu=NUM_CORE,preload=False)
-#site_set = get_dataloader_site(
-#    site_ID=args.site, path_wavfile=args.folder, meta_site=meta_site,meta_path=args.metadata_folder,database = DATABASE,batch_size=args.batch_size,flacfolder=flacfolder,ncpu=args.ncpu,preload=args.preload)
-
 site_set = get_dataloader_site_fromresults(
-    site_ID=args.site, path_wavfile=args.folder, results_path=args.results_folder,meta_site=meta_site,meta_path=args.metadata_folder,database = DATABASE,batch_size=args.batch_size,flacfolder=flacfolder,ncpu=args.ncpu,preload=args.preload)
+    site_ID=args.site, path_wavfile=sitefolder, results_path=args.results_folder,meta_site=meta_site,meta_path=args.metadata_folder,database = DATABASE,batch_size=args.batch_size,flacfolder=flacfolder,ncpu=args.ncpu,preload=args.preload)
 
 print("FLAC conversion...")
 
@@ -246,5 +264,13 @@ for idx in range(nb_archives):
 print('Removing flac folder')
 # remove the flac folder
 os.rmdir(flacfolder)
+
+print('Copying all the results to the nas')
+destdir = args.destdir
+sitefolder = os.path.join(args.toflac,args.site[1:])
+os.makedirs(destdir,exist_ok=True)
+
+# copy the whole sitefolder to destdir
+shutil.copytree(sitefolder,destdir)
 
 print('Finished !')
