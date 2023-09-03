@@ -12,7 +12,6 @@ run.sh
 *.pth.tar
 *.pt
 *.wav
-
 ## NIFTI
 *.nii.gz
 *.wav
@@ -150,3 +149,11 @@ test.csv
 *.html
 *.xlsx
 *.mp3
+
+### specific to this project
+conversion_*
+hosts
+slurmlaunch.sh
+slurm-sbatch/
+log-convert/
+logs/

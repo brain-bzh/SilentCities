@@ -275,7 +275,7 @@ def get_dataloader_site(site_ID, path_wavfile, meta_site, df_site,meta_path, dat
     print(meta_dataloader)
 
     site_set = Silent_dataset(meta_dataloader=meta_dataloader.reset_index(drop=True),
-     sr_eco=sr_eco,sr_tagging=sr_tagging, file_refdB=file_refdB,to_mp3=mp3folder,preload=preload)
+     sr_eco=sr_eco,sr_tagging=sr_tagging, file_refdB=file_refdB,to_mp3=mp3folder,preload=False)
     site_set = torch.utils.data.DataLoader(
         site_set, batch_size=1, shuffle=False, num_workers=ncpu)
     

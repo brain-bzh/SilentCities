@@ -3,7 +3,7 @@ parallel-ssh -A -i -h hosts "mkdir -p /users/local/bigdisk1 ; mkdir -p /users/lo
 #squeue -o %.18i %.9P %.20j %.8u %.2t %.10M %.6D %R
 #TEST COMMAND
 #python audio_processing.py --metadata_folder /users3/local/bigdisk2/meta_silentcities/TEST/ --site 0000 --folder /users3/local/bigdisk1/silentcities/0000/ --database /users3/local/bigdisk2/meta_silentcities/TEST/database_pross.pkl --batch_size 64
-
+# ssh pc-elec-396.priv.enst-bretagne.fr "df -h | grep /users/local" 
 
 
 

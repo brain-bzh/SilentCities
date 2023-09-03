@@ -71,13 +71,13 @@ else:
 
 ## Use the relative path to /bigdisk if it's not mounted
 
-if not(os.path.isdir('/bigdisk1')):
+"""if not(os.path.isdir('/bigdisk1')):
     args.metadata_folder = args.metadata_folder.replace('/bigdisk1','/users/local/bigdisk1')
     args.toflac = args.metadata_folder.replace('/bigdisk1','/users/local/bigdisk1')
     args.database = args.database.replace('/bigdisk1','/users/local/bigdisk1')
     args.results_folder = args.results_folder.replace('/bigdisk1','/users/local/bigdisk1')
     print("replaced the bigdisk1 path with /users/local/bigdisk1")
-
+"""
 
 ## utility functions
 
@@ -272,16 +272,16 @@ print('Removing flac folder')
 # remove the flac folder
 os.rmdir(flacfolder)
 
-print('Copying all the results to the nas')
-destdir = args.destdir
-sitefolder = os.path.join(args.toflac,args.site[1:])
-os.makedirs(destdir,exist_ok=True)
+#print('Copying all the results to the nas')
+#destdir = args.destdir
+#sitefolder = os.path.join(args.toflac,args.site[1:])
+#os.makedirs(destdir,exist_ok=True)
 
 # copy the whole sitefolder to destdir
-shutil.copytree(sitefolder,destdir)
+#shutil.move(sitefolder,destdir)
 
 # time elapsed
-elapsed = time.time() - start_time
+elapsed = datetime.datetime.now() - start_time
 print(f"Time elapsed: {elapsed:.2f} s for {nb_files} files")
 
 print('Finished !')
