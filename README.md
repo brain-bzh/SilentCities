@@ -1,10 +1,10 @@
-Silent Cities Data preparation
+Silent Cities Data Download and Data Preparation reference
 --
 
 This repository includes python code related to the [Silent Cities Dataset](https://osf.io/h285u/). There are two parts: 
 
 1. A Dataset Downloader script
-2. Code used for data preparation prior to publication. It is provided here for transparency and documentation 
+2. Code used for data preparation prior to publication. It is provided here for transparency and documentation. **You do NOT need to run this code if you want to use the dataset.**
 
 Dataset Downloader
 --
