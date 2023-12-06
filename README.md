@@ -1,26 +1,15 @@
 Silent Cities Data preparation
 --
 
-This repository includes the python code that was used to prepare the [Silent Cities Dataset](https://osf.io/h285u/) prior to publication. It is provided here for transparency and documentation, but cannot be used as is. 
+This repository includes python code related to the [Silent Cities Dataset](https://osf.io/h285u/). There are two parts: 
 
-Description
---
-The overall sequence of processing is as follows. 
+1. A Dataset Downloader script
+2. Code used for data preparation prior to publication. It is provided here for transparency and documentation 
 
-Data preparation:
-- Generation of a metadata file for each recording site, gathering all available audio for this site using [metadata_file.py](metadata_file.py)
-- Generation of a metadata file across all sites using [metadata_site.py](metadata_site.py)
-
-Data analysis (Script [audio_processing.py](audio_processing.py)):
-- Calculation of ecoacoustic indices every 10 seconds
-- Applying a pretrained Deep Learning model for audio tagging. (pretrained on [Audioset](https://research.google.com/audioset/) using ResNet22 from [PANNs](https://github.com/qiuqiangkong/audioset_tagging_cnn))
-
-Final step:
-- Encoding of all raw audio files to FLAC format and final export in script [convert.py](convert.py)
-
-Downloader
+Dataset Downloader
 --
 The script [download_osf.py](download_osf.py) will download the whole dataset. Beware that the full dataset is close to 5 terabytes. 
+
 
 ```
 usage: download_osf.py [-h] [--dest DEST [DEST ...]]
@@ -36,6 +25,31 @@ Example usage
 python download_osf.py --dest /media/disk2/ /media/disk1/
 ```
 This will first download on `/media/disk1/`, then when it's full it will download on `/media/disk2/`. 
+
+
+Requirements for the data downloader
+
+```
+numpy==1.23.5
+pandas==2.0.0
+Requests==2.31.0
+wget==3.2
+```
+
+Description of Data preparation
+--
+The overall sequence of processing is as follows. 
+
+Data preparation:
+- Generation of a metadata file for each recording site, gathering all available audio for this site using [metadata_file.py](metadata_file.py)
+- Generation of a metadata file across all sites using [metadata_site.py](metadata_site.py)
+
+Data analysis (Script [audio_processing.py](audio_processing.py)):
+- Calculation of ecoacoustic indices every 10 seconds
+- Applying a pretrained Deep Learning model for audio tagging. (pretrained on [Audioset](https://research.google.com/audioset/) using ResNet22 from [PANNs](https://github.com/qiuqiangkong/audioset_tagging_cnn))
+
+Final step:
+- Encoding of all raw audio files to FLAC format and final export in script [convert.py](convert.py)
 
 
 
