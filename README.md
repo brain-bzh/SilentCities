@@ -1,35 +1,32 @@
-Silent Cities Data preprocessing
+Silent Cities Data preparation
 --
 
-This repository includes python code for preprocessing data from the [Silent Cities project](https://osf.io/h285u/). 
+This repository includes the python code that was used to prepare the [Silent Cities Dataset](https://osf.io/h285u/) prior to publication. It is provided here for transparency and documentation, but cannot be used as is. 
+
+Description
+--
+The overall sequence of processing is as follows. 
 
 Data preparation:
-- Generation of a metadata file for each recording site, gathering all available audio for this site
-- Generation of a metadata file across all sites
+- Generation of a metadata file for each recording site, gathering all available audio for this site using [metadata_file.py](metadata_file.py)
+- Generation of a metadata file across all sites using [metadata_site.py](metadata_site.py)
 
-Data analysis:
+Data analysis (Script [audio_processing.py](audio_processing.py)):
 - Calculation of ecoacoustic indices every 10 seconds
 - Applying a pretrained Deep Learning model for audio tagging. (pretrained on [Audioset](https://research.google.com/audioset/) using ResNet22 from [PANNs](https://github.com/qiuqiangkong/audioset_tagging_cnn))
 
-This was developed for analyzing the data collected in the [Silent Cities project](https://osf.io/h285u/).
+Final step:
+- Encoding of all raw audio files to FLAC format and final export in script [convert.py](convert.py)
 
 Requirements
 --
-- [pytorch](https://pytorch.org/) 1.4.0
-- [librosa](https://librosa.github.io/librosa/)
-- argparse
-- scipy
-- tqdm
-- pandas
-- numpy
-- matplotlib
-- plotly
+A requirements file is provided for reference [here](requirements.txt), exact versions might not be needed. Please adapt according to your setup. 
 
 Usage
 --
 ## Preprocessing : 
 
-file by file 
+file by file (individual files)
 
     python metadata_file.py [-h] [--folder FOLDER] 
                                 [--save_path SAVE_PATH]
@@ -46,7 +43,7 @@ file by file
     --all                 process all site. for multiple HDD (list path must be given in HDD variable in the script)
 Generate one CSV by site
 
-All site
+All sites
 
     python metadata_site.py [-h] [--folder FOLDER] 
                             [--save_path SAVE_PATH] [--database DATABASE] 
