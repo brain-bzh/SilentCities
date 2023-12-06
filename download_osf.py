@@ -11,8 +11,8 @@ import numpy as np
 disk = 'osfstorage'
 repo = 'h285u'
 
-savepath = ['/media/nicolas/Silent',
-            '/media/nicolas/LaCie']  # List of HDD savepath
+savepath = ['/users/local/nico',
+            '/users/local/nico']  # List of HDD savepath
 
 query = ''
 url = 'https://api.osf.io/v2/nodes/{0}/files/{2}/{1}'.format(repo, query, disk)
