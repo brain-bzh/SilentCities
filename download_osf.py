@@ -7,12 +7,19 @@ import shutil
 import zipfile
 import pandas as pd
 import numpy as np
+import argparse
 
 disk = 'osfstorage'
 repo = 'h285u'
 
-savepath = ['/users/local/nico',
-            '/users/local/nico']  # List of HDD savepath
+## Argument parser to add the path of the savepath
+parser = argparse.ArgumentParser()
+parser.add_argument('--dest', nargs='+', type=str,help='Add as many paths as you want to download the data. If one path does not have enough space, it will switch to the next one')
+args = parser.parse_args()
+savepath = args.dest
+
+if len(savepath) == 1:
+    savepath = [savepath[0], savepath[0]]
 
 query = ''
 url = 'https://api.osf.io/v2/nodes/{0}/files/{2}/{1}'.format(repo, query, disk)

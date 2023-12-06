@@ -18,6 +18,27 @@ Data analysis (Script [audio_processing.py](audio_processing.py)):
 Final step:
 - Encoding of all raw audio files to FLAC format and final export in script [convert.py](convert.py)
 
+Downloader
+--
+The script [download_osf.py](download_osf.py) will download the whole dataset. Beware that the full dataset is close to 5 terabytes. 
+
+```
+usage: download_osf.py [-h] [--dest DEST [DEST ...]]
+
+options:
+  -h, --help            show this help message and exit
+  --dest DEST [DEST ...]
+                        Add here as many paths as you want to download the data. If one path does not have enough space, it will switch to the next one
+```
+
+Example usage 
+```
+python download_osf.py --dest /media/disk2/ /media/disk1/
+```
+This will first download on `/media/disk1/`, then when it's full it will download on `/media/disk2/`. 
+
+
+
 Requirements
 --
 A requirements file is provided for reference [here](requirements.txt), exact versions might not be needed. Please adapt according to your setup. 
